@@ -1,0 +1,23 @@
+﻿@import 'tailwindcss';
+
+@theme {
+  --color-brand-cyan: #0ea5e9;
+  --color-brand-dark: #0f172a;
+}
+
+body {
+  background-color: var(--color-brand-dark);
+  color: white;
+  margin: 0;
+  min-height: 100vh;
+}
+
+@layer utilities {
+  .glass-panel {
+    background: rgba(15, 23, 42, 0.4);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  }
+}
