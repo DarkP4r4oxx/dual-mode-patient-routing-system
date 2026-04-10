@@ -163,7 +163,7 @@ export default function App() {
 
   return (
     <BrowserRouter>
-      <div className="min-h-screen flex flex-col font-sans selection:bg-[#0ea5e9] selection:text-white relative" style={{background:'var(--bg)',color:'var(--text-1)'}}>
+      <div className="w-full min-h-screen flex flex-col font-sans selection:bg-[#0ea5e9] selection:text-white relative overflow-x-hidden" style={{background:'var(--bg)',color:'var(--text-1)'}}>
         <div className="absolute top-1/4 left-1/4 w-[40rem] h-[40rem] bg-[#0ea5e9] rounded-full mix-blend-multiply filter blur-[128px] opacity-10 pointer-events-none" />
         <div className="absolute bottom-1/4 right-1/4 w-[30rem] h-[30rem] bg-indigo-500 rounded-full mix-blend-multiply filter blur-[128px] opacity-10 pointer-events-none" />
         <Routes>
@@ -288,7 +288,7 @@ function HeroSection({ t, onNext }) {
           <span className="relative z-10">{t.bookBtn}</span>
           <ArrowRight size={20} className="relative z-10 group-hover:translate-x-1.5 transition-transform duration-300" />
         </button>
-        <button onClick={() => navigate('/doctor-login')} className="px-6 py-4 rounded-xl text-sm font-semibold transition-colors hover:bg-white/5 border border-transparent hover:border-[var(--border)]" style={{color:'var(--text-3)'}}>
+        <button onClick={() => navigate('/doctor-login')} className="px-6 py-4 rounded-xl text-sm font-semibold transition-colors hover:bg-white/5 border border-transparent hover:border-[var(--border)]" style={{color:'var(--text-2)'}}>
           {t.doctorPortal}
         </button>
       </div>
@@ -576,23 +576,29 @@ function QueueTracker({ t, refCode, onReset, bookedSlot, bookedDate }) {
   }
 
   return (
-    <div className="glass-panel rounded-2xl p-8 space-y-8 animate-in slide-in-from-right-8 duration-500">
+    <div className="glass-panel rounded-2xl p-6 sm:p-8 space-y-6 animate-in slide-in-from-right-8 duration-500">
       <div className="text-center space-y-2">
-        <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-emerald-500/20 text-emerald-400 mb-2 border border-emerald-500/20"><ShieldCheck size={24} /></div>
+        <div className="inline-flex items-center justify-center w-12 h-12 rounded-full border mb-2" style={{ background: 'var(--glow-1)', borderColor: 'var(--border-2)', color: 'var(--brand)' }}>
+          <ShieldCheck size={24} />
+        </div>
         <h2 className="text-xl font-bold">{t.successTitle}</h2>
-        <p className="text-sm text-slate-400">{t.successSub}</p>
+        <p className="text-sm" style={{ color: 'var(--text-2)' }}>{t.successSub}</p>
       </div>
-      <div className="bg-black/30 border border-white/5 rounded-xl p-6 text-center space-y-6">
+      <div className="rounded-xl p-6 text-center space-y-4 border" style={{ background: 'var(--bg-2)', borderColor: 'var(--border)' }}>
         <div>
-          <p className="text-slate-400 text-xs uppercase tracking-wider font-semibold mb-2">{t.ewt}</p>
-          <div className="text-5xl font-black text-white tracking-tighter">{formatEWT(ewt)}</div>
+          <p className="text-xs uppercase tracking-wider font-semibold mb-1" style={{ color: 'var(--text-3)' }}>{t.ewt}</p>
+          <div className="text-5xl font-black tracking-tighter" style={{ color: 'var(--text-1)' }}>{formatEWT(ewt)}</div>
         </div>
-        <div className="flex items-center justify-between bg-white/5 border border-white/10 rounded-lg p-3">
-          <span className="text-sm font-mono text-slate-300">{t.bookingRef}: {refCode}</span>
-          <button onClick={() => navigator.clipboard.writeText(refCode)} className="text-slate-400 hover:text-white p-1"><Copy size={16} /></button>
+        <div className="flex items-center justify-between border rounded-lg p-3" style={{ background: 'var(--bg-2)', borderColor: 'var(--border)' }}>
+          <span className="text-sm font-mono" style={{ color: 'var(--text-2)' }}>{t.bookingRef}: {refCode}</span>
+          <button onClick={() => navigator.clipboard.writeText(refCode)} className="p-1 transition-colors hover:text-[#0ea5e9]" style={{ color: 'var(--text-3)' }}>
+            <Copy size={16} />
+          </button>
         </div>
       </div>
-      <button onClick={onReset} className="w-full text-slate-400 hover:text-white text-sm font-medium transition-colors p-2">{t.cancelBtn}</button>
+      <button onClick={onReset} className="w-full text-sm font-medium transition-colors hover:text-red-400 p-2" style={{ color: 'var(--text-3)' }}>
+        {t.cancelBtn}
+      </button>
     </div>
   );
 }
