@@ -201,8 +201,8 @@ export default function LiveQueuePage({ isDark, toggleTheme }) {
             <ArrowLeft size={15} style={S.text2} />
           </button>
           <div className="flex items-center gap-2 cursor-pointer transition-transform hover:scale-105 active:scale-95" onClick={() => navigate('/')}>
-            <div className="w-7 h-7 rounded-lg bg-[#0ea5e9] flex items-center justify-center font-bold text-[var(--text-1)] text-xs shadow-lg shadow-[#0ea5e9]/25">S</div>
-            <span className="font-bold tracking-tight" style={S.text2}>SyncQ</span>
+            <div className="w-7 h-7 rounded-lg bg-[#0ea5e9] flex items-center justify-center font-bold text-[var(--text-1)] text-xs shadow-lg shadow-[#0ea5e9]/25">H</div>
+            <span className="font-bold tracking-tight" style={S.text2}>HyQ</span>
             <span className="text-sm hidden sm:block" style={S.text3}>/ My Queue Status</span>
           </div>
         </div>
@@ -235,7 +235,7 @@ export default function LiveQueuePage({ isDark, toggleTheme }) {
       <main className="flex-1 p-5 max-w-lg mx-auto w-full space-y-4">
 
         {/* Search / Status card */}
-        <div className="glass-panel rounded-2xl p-5 space-y-3" style={{ borderColor: 'var(--border)' }}>
+        <div className="neu-panel rounded-2xl p-5 space-y-3" style={{ borderColor: 'var(--border)' }}>
           <p className="text-sm font-semibold" style={S.text2}>
             {currentUser ? 'Your Queue Status' : 'Check Your Booking'}
           </p>
@@ -272,7 +272,7 @@ export default function LiveQueuePage({ isDark, toggleTheme }) {
 
         {/* Loading spinner */}
         {(loading || currentUser === undefined) && (
-          <div className="glass-panel rounded-2xl p-12 flex flex-col items-center gap-4" style={{ borderColor: 'var(--border)' }}>
+          <div className="neu-panel rounded-2xl p-12 flex flex-col items-center gap-4" style={{ borderColor: 'var(--border)' }}>
             <div className="w-8 h-8 rounded-full border-2 border-[#0ea5e9] border-t-transparent animate-spin" />
             <p className="text-sm" style={S.text3}>Connecting to live queue…</p>
           </div>
@@ -293,7 +293,7 @@ export default function LiveQueuePage({ isDark, toggleTheme }) {
             </div>
 
             {myBookings.map((booking) => (
-              <div key={booking.docId} className="glass-panel rounded-2xl p-5 space-y-4 border-2" style={S.cardHi}>
+              <div key={booking.docId} className="neu-panel rounded-2xl p-5 space-y-4 border-2" style={S.cardHi}>
                 {/* Ref + doctor */}
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-mono font-bold text-[#0ea5e9]">{booking.id}</span>
@@ -344,7 +344,7 @@ export default function LiveQueuePage({ isDark, toggleTheme }) {
 
         {/* Not found */}
         {!loading && currentUser !== undefined && myBookings.length === 0 && (currentUser || searchRef.length >= 4) && (
-          <div className="glass-panel rounded-2xl p-8 text-center space-y-3" style={{ borderColor: 'var(--border)' }}>
+          <div className="neu-panel rounded-2xl p-8 text-center space-y-3" style={{ borderColor: 'var(--border)' }}>
             <div className="text-4xl">🔍</div>
             <p className="font-semibold">No booking found</p>
             <p className="text-sm" style={S.text3}>

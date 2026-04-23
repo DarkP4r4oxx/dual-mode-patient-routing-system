@@ -5,8 +5,8 @@ import { auth } from './firebaseClient';
 import { Stethoscope, Mail, Lock, ArrowRight, ShieldCheck, Sun, Moon } from 'lucide-react';
 
 const APPROVED_DOCTOR_EMAILS = [
-  'dr.sharma@syncq.com','dr.patil@syncq.com','dr.mehta@syncq.com','dr.khan@syncq.com',
-  'dr.reddy@syncq.com','dr.joshi@syncq.com','dr.nair@syncq.com','dr.singh@syncq.com',
+  'dr.sharma@hyq.com','dr.patil@hyq.com','dr.mehta@hyq.com','dr.khan@hyq.com',
+  'dr.reddy@hyq.com','dr.joshi@hyq.com','dr.nair@hyq.com','dr.singh@hyq.com',
 ];
 
 export default function DoctorAuthPage({ isDark, toggleTheme }) {
@@ -62,8 +62,8 @@ export default function DoctorAuthPage({ isDark, toggleTheme }) {
       <div className="w-full max-w-md z-10 space-y-6">
         <div className="text-center space-y-3">
           <div className="inline-flex items-center gap-2 cursor-pointer transition-transform hover:scale-105 active:scale-95" onClick={() => navigate('/')}>
-            <div className="w-10 h-10 rounded-xl bg-[#0ea5e9] flex items-center justify-center font-bold text-[var(--text-1)] shadow-lg shadow-[#0ea5e9]/30 text-xl">S</div>
-            <span className="text-2xl font-bold tracking-tight">SyncQ</span>
+            <div className="w-10 h-10 rounded-xl bg-[#0ea5e9] flex items-center justify-center font-bold text-[var(--text-1)] shadow-lg shadow-[#0ea5e9]/30 text-xl">H</div>
+            <span className="text-2xl font-bold tracking-tight">HyQ</span>
           </div>
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold text-amber-500 border border-amber-500/25"
             style={{ background: 'rgba(245,158,11,0.08)' }}>
@@ -71,14 +71,14 @@ export default function DoctorAuthPage({ isDark, toggleTheme }) {
           </div>
         </div>
 
-        <div className="glass-panel rounded-2xl p-8 space-y-5" style={S.card}>
+        <div className="neu-panel rounded-2xl p-8 space-y-5" style={S.card}>
           <div className="text-center">
             <div className="w-14 h-14 rounded-2xl border flex items-center justify-center mx-auto mb-3"
               style={{ background: 'rgba(14,165,233,0.08)', borderColor: 'rgba(14,165,233,0.2)' }}>
               <Stethoscope size={28} className="text-[#0ea5e9]" />
             </div>
             <h2 className="text-lg font-bold">Doctor Sign In</h2>
-            <p className="text-sm mt-1" style={S.text3}>Access the SyncQ Unified Dashboard</p>
+            <p className="text-sm mt-1" style={S.text3}>Access the HyQ Unified Dashboard</p>
           </div>
 
           {error && (
@@ -90,7 +90,7 @@ export default function DoctorAuthPage({ isDark, toggleTheme }) {
           <form onSubmit={handleLogin} className="space-y-3">
             <div className="relative">
               <Mail size={15} className="absolute left-3 top-1/2 -translate-y-1/2" style={S.text3} />
-              <input type="email" required placeholder="Doctor Email (e.g. dr.sharma@syncq.com)"
+              <input type="email" required placeholder="Doctor Email (e.g. dr.sharma@hyq.com)"
                 value={email} onChange={e => setEmail(e.target.value)}
                 className="w-full border rounded-xl pl-10 pr-4 py-3 text-sm focus:outline-none transition-all"
                 style={S.input}

@@ -14,14 +14,14 @@ import LiveQueuePage from './LiveQueuePage';
 
 // ─── Doctor Directory ─────────────────────────────────────────────────────────
 const DOCTORS = [
-  { id: 'd1', name: 'Dr. Sharma', email: 'dr.sharma@syncq.com', specialty: 'General Medicine', status: 'Available', color: 'bg-sky-500', hours: { start: 9, end: 17 } },
-  { id: 'd2', name: 'Dr. Patil', email: 'dr.patil@syncq.com', specialty: 'Cardiology', status: 'Available', color: 'bg-rose-500', hours: { start: 10, end: 16 } },
-  { id: 'd3', name: 'Dr. Mehta', email: 'dr.mehta@syncq.com', specialty: 'Orthopedics', status: 'In Surgery', color: 'bg-amber-500', hours: { start: 9, end: 14 } },
-  { id: 'd4', name: 'Dr. Khan', email: 'dr.khan@syncq.com', specialty: 'Dermatology', status: 'Available', color: 'bg-emerald-500', hours: { start: 11, end: 18 } },
-  { id: 'd5', name: 'Dr. Reddy', email: 'dr.reddy@syncq.com', specialty: 'Pediatrics', status: 'Available', color: 'bg-purple-500', hours: { start: 9, end: 15 } },
-  { id: 'd6', name: 'Dr. Joshi', email: 'dr.joshi@syncq.com', specialty: 'ENT', status: 'On Leave', color: 'bg-orange-500', hours: { start: 9, end: 17 } },
-  { id: 'd7', name: 'Dr. Nair', email: 'dr.nair@syncq.com', specialty: 'General Medicine', status: 'Available', color: 'bg-teal-500', hours: { start: 8, end: 14 } },
-  { id: 'd8', name: 'Dr. Singh', email: 'dr.singh@syncq.com', specialty: 'Cardiology', status: 'Available', color: 'bg-indigo-500', hours: { start: 14, end: 20 } },
+  { id: 'd1', name: 'Dr. Sharma', email: 'dr.sharma@hyq.com', specialty: 'General Medicine', status: 'Available', color: 'bg-sky-500', hours: { start: 9, end: 17 } },
+  { id: 'd2', name: 'Dr. Patil', email: 'dr.patil@hyq.com', specialty: 'Cardiology', status: 'Available', color: 'bg-rose-500', hours: { start: 10, end: 16 } },
+  { id: 'd3', name: 'Dr. Mehta', email: 'dr.mehta@hyq.com', specialty: 'Orthopedics', status: 'In Surgery', color: 'bg-amber-500', hours: { start: 9, end: 14 } },
+  { id: 'd4', name: 'Dr. Khan', email: 'dr.khan@hyq.com', specialty: 'Dermatology', status: 'Available', color: 'bg-emerald-500', hours: { start: 11, end: 18 } },
+  { id: 'd5', name: 'Dr. Reddy', email: 'dr.reddy@hyq.com', specialty: 'Pediatrics', status: 'Available', color: 'bg-purple-500', hours: { start: 9, end: 15 } },
+  { id: 'd6', name: 'Dr. Joshi', email: 'dr.joshi@hyq.com', specialty: 'ENT', status: 'On Leave', color: 'bg-orange-500', hours: { start: 9, end: 17 } },
+  { id: 'd7', name: 'Dr. Nair', email: 'dr.nair@hyq.com', specialty: 'General Medicine', status: 'Available', color: 'bg-teal-500', hours: { start: 8, end: 14 } },
+  { id: 'd8', name: 'Dr. Singh', email: 'dr.singh@hyq.com', specialty: 'Cardiology', status: 'Available', color: 'bg-indigo-500', hours: { start: 14, end: 20 } },
 ];
 
 const SPECIALTIES = ['All', 'General Medicine', 'Cardiology', 'Orthopedics', 'Dermatology', 'Pediatrics', 'ENT'];
@@ -149,14 +149,14 @@ function LoadingScreen() {
 // ─── App ──────────────────────────────────────────────────────────────────────
 export default function App() {
   const [isDark, setIsDark] = useState(() => {
-    const saved = localStorage.getItem('syncq-theme');
+    const saved = localStorage.getItem('HyQ-theme');
     return saved ? saved === 'dark' : true;
   });
 
   useEffect(() => {
     const root = document.documentElement;
     if (isDark) { root.classList.remove('light'); } else { root.classList.add('light'); }
-    localStorage.setItem('syncq-theme', isDark ? 'dark' : 'light');
+    localStorage.setItem('HyQ-theme', isDark ? 'dark' : 'light');
   }, [isDark]);
 
   const toggleTheme = () => setIsDark(d => !d);
@@ -199,8 +199,8 @@ function PatientPortal({ isDark, toggleTheme }) {
     <>
       <header className="w-full glass-panel border-b px-6 py-3.5 flex items-center justify-between sticky top-0 z-50" style={{borderColor:'var(--border)'}}>
         <div className="flex items-center space-x-2 cursor-pointer transition-transform hover:scale-105 active:scale-95" onClick={() => navigate('/')}>
-          <div className="w-8 h-8 rounded-lg bg-[#0ea5e9] flex items-center justify-center font-bold text-[var(--text-1)] shadow-lg shadow-[#0ea5e9]/20 text-sm">S</div>
-          <span className="text-lg font-bold tracking-tight" style={{color:'var(--text-1)'}}>SyncQ</span>
+          <div className="w-8 h-8 rounded-lg bg-[#0ea5e9] flex items-center justify-center font-bold text-[var(--text-1)] shadow-lg shadow-[#0ea5e9]/20 text-sm">H</div>
+          <span className="text-lg font-bold tracking-tight" style={{color:'var(--text-1)'}}>HyQ</span>
         </div>
         <div className="flex items-center gap-2">
           <div className="hidden sm:flex items-center space-x-1 rounded-full px-3 py-1.5 border text-xs" style={{background:'var(--bg-2)',borderColor:'var(--border)'}}>
@@ -265,7 +265,7 @@ function HeroSection({ t, onNext }) {
           </span>
         </h1>
         <p className="text-sm md:text-lg max-w-lg mx-auto leading-relaxed" style={{color:'var(--text-2)'}}>
-          SyncQ eliminates waiting rooms. Book your slot, track your position live,
+          HyQ eliminates waiting rooms. Book your slot, track your position live,
           and walk in <strong style={{color:'var(--text-1)'}}>exactly when the doctor is ready</strong> for you.
         </p>
       </div>
@@ -612,23 +612,66 @@ function DoctorDashboard() {
   const [loading, setLoading] = useState(true);
   const [filterDoctor, setFilterDoctor] = useState('All');
   const [filterDate, setFilterDate] = useState(new Date().toISOString().split('T')[0]);
+  
+  const [activeTab, setActiveTab] = useState('LIVE'); // 'LIVE' | 'OFFLINE'
+  const [offlineHubQueue, setOfflineHubQueue] = useState([]);
 
   const currentDoctor = DOCTORS.find(d => d.email === user?.email?.toLowerCase());
 
+  // Removed volatile fetching; we now rely on manual robust syncing to avoid ghost-doc crashes.
   useEffect(() => {
     const q = query(collection(db, 'appointments'), orderBy('created_at', 'asc'));
     const unsub = onSnapshot(q,
       (snap) => {
         const cloudData = snap.docs.map(doc => ({ docId: doc.id, ...doc.data() })).filter(d => d.status !== 'Completed');
-        fetch('http://192.168.4.1/local-data', { signal: AbortSignal.timeout(2000) })
-          .then(r => r.json()).then(local => setQueue(applysjf([...cloudData, ...(local || [])])))
-          .catch(() => setQueue(applysjf(cloudData)));
+        setQueue(applysjf(cloudData));
         setConnectionState('ONLINE'); setLoading(false);
       },
       (err) => { console.error(err); setConnectionState('OFFLINE'); setLoading(false); }
     );
     return () => unsub();
   }, []);
+
+  const [syncingNode, setSyncingNode] = useState(false);
+
+  const handleSyncNodeMCU = async () => {
+    try {
+      setSyncingNode(true);
+      const res = await fetch('http://192.168.4.1/local-data');
+      if (!res.ok) throw new Error("Could not connect to local NodeMCU API.");
+      const localData = await res.json();
+      
+      setOfflineHubQueue(localData || []);
+      setActiveTab('OFFLINE');
+    } catch (e) {
+      alert("⚠️ NodeMCU Connection Error: Please ensure you are connected to the NodeMCU Wi-Fi network. " + e.message);
+    } finally {
+      setSyncingNode(false);
+    }
+  };
+
+  const handleOfflineAction = async (id, action) => {
+    try {
+       if (action === 'delete') {
+         await fetch('http://192.168.4.1/delete', { method: 'POST', body: JSON.stringify({id}) });
+       } else {
+         await fetch('http://192.168.4.1/update-status', { method: 'POST', body: JSON.stringify({id, status: action}) });
+       }
+       // Auto refresh hub
+       handleSyncNodeMCU();
+    } catch(err) {
+       alert("Failed to reach NodeMCU to execute action. Ensure you are connected to its WiFi! " + err.message);
+    }
+  };
+
+  const handlePurgeNodeMCU = async () => {
+    if(!window.confirm("WARNING: This will permanently erase the NodeMCU device's backup memory cache! Are you sure?")) return;
+    try { 
+      await fetch('http://192.168.4.1/clear-data', { method: 'POST' }); 
+      setOfflineHubQueue([]);
+      alert("NodeMCU memory successfully erased.");
+    } catch(err) { alert("Purge failed. Connect to NodeMCU network first."); }
+  };
 
   function applysjf(data) {
     const parseTime = (timeStr) => {
@@ -725,7 +768,7 @@ function DoctorDashboard() {
         <div className="flex items-center space-x-3">
           <div className="w-10 h-10 rounded-xl bg-slate-800 border border-slate-700 flex items-center justify-center text-[#0ea5e9]"><Stethoscope size={20} /></div>
           <div>
-            <h1 className="text-2xl font-bold">SyncQ Unified Dashboard</h1>
+            <h1 className="text-2xl font-bold">HyQ Unified Dashboard</h1>
             <p className="text-slate-400 text-sm">
               {currentDoctor ? `${currentDoctor.name} · ${currentDoctor.specialty}` : 'Doctor Terminal (SJF Protocol)'}
             </p>
@@ -734,6 +777,12 @@ function DoctorDashboard() {
         <div className="flex items-center gap-3 flex-wrap">
           {connectionState === 'ONLINE' && <div className="flex items-center gap-1.5 bg-sky-500/10 text-sky-400 px-3 py-1.5 rounded-full text-xs font-semibold border border-sky-500/20"><Cloud size={13} />🌐 Cloud Connected</div>}
           {connectionState === 'OFFLINE' && <div className="flex items-center gap-1.5 bg-amber-500/10 text-amber-400 px-3 py-1.5 rounded-full text-xs font-semibold border border-amber-500/20"><WifiOff size={13} />📡 Local Only</div>}
+          
+          <button onClick={handleSyncNodeMCU} disabled={syncingNode} className="flex items-center gap-2 text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 px-3 py-1.5 rounded-full text-xs font-bold transition-all disabled:opacity-50">
+            {syncingNode ? <div className="w-3 h-3 rounded-full border-2 border-emerald-400 border-t-transparent animate-spin"/> : <Activity size={14}/>}
+            {syncingNode ? 'Connecting...' : 'Connect to NodeMCU Server'}
+          </button>
+
           <div className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-full px-3 py-1.5">
             <User size={13} className="text-slate-400" />
             <span className="text-xs text-slate-300">{user?.email?.split('@')[0]}</span>
@@ -744,13 +793,23 @@ function DoctorDashboard() {
         </div>
       </div>
 
-      {/* Filters: Date & DoctorTabs */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-5">
-        <div className="flex gap-2 overflow-x-auto pb-2 shrink-0">
-          <button onClick={() => setFilterDoctor('All')}
-            className={`px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap border transition-all ${filterDoctor === 'All' ? 'bg-[#0ea5e9] text-white border-[#0ea5e9]' : 'bg-white/5 text-slate-400 border-white/10 hover:text-white'}`}>
-            All Patients ({queue.filter(q => (q.booking_date || new Date().toISOString().split('T')[0]) === filterDate).length})
-          </button>
+      {/* Main Tabs */}
+      <div className="flex gap-4 mb-4 border-b border-white/10 pb-2">
+        <button onClick={() => setActiveTab('LIVE')} className={`px-4 py-2 font-bold text-sm tracking-wide transition-all ${activeTab === 'LIVE' ? 'text-[#0ea5e9] border-b-2 border-[#0ea5e9]' : 'text-slate-500 hover:text-slate-300'}`}>Live Cloud Queue</button>
+        <button onClick={() => setActiveTab('OFFLINE')} className={`px-4 py-2 font-bold text-sm tracking-wide transition-all ${activeTab === 'OFFLINE' ? 'text-emerald-400 border-b-2 border-emerald-400' : 'text-slate-500 hover:text-slate-300'} flex items-center gap-2`}>
+          Local Offline Hub {offlineHubQueue.length > 0 && <span className="bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded-full text-xs">{offlineHubQueue.length}</span>}
+        </button>
+      </div>
+
+      {activeTab === 'LIVE' ? (
+        <>
+          {/* Filters: Date & DoctorTabs */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-5">
+            <div className="flex gap-2 overflow-x-auto pb-2 shrink-0">
+              <button onClick={() => setFilterDoctor('All')}
+                className={`px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap border transition-all ${filterDoctor === 'All' ? 'bg-[#0ea5e9] text-white border-[#0ea5e9]' : 'bg-white/5 text-slate-400 border-white/10 hover:text-white'}`}>
+                All Patients ({queue.filter(q => (q.booking_date || new Date().toISOString().split('T')[0]) === filterDate).length})
+              </button>
           {DOCTORS.map(doc => {
             const count = queue.filter(p => p.doctor === doc.name && (p.booking_date || new Date().toISOString().split('T')[0]) === filterDate).length;
             if (count === 0 && filterDoctor !== doc.name) return null; // hide empty doctors unless selected
@@ -866,6 +925,74 @@ function DoctorDashboard() {
               );
             })}
           </div>
+        </div>
+      )}
+      </>
+      ) : (
+        <div className="space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-500">
+           <div className="glass-panel p-6 rounded-2xl flex flex-col md:flex-row items-start md:items-center justify-between gap-4 border border-emerald-500/20 bg-emerald-500/5">
+              <div>
+                <h3 className="text-xl font-bold text-emerald-400">Independent Local Server Hub</h3>
+                <p className="text-sm text-emerald-400/70">Connect to the NodeMCU WiFi to directly control the local queuing system. Patients' phones will blink locally!</p>
+              </div>
+              <div className="flex gap-2">
+                 <button onClick={handleSyncNodeMCU} className="text-xs bg-emerald-500 text-white font-bold px-4 py-2 rounded-lg whitespace-nowrap shadow-[0_0_15px_rgba(16,185,129,0.3)] hover:scale-105 transition-all">
+                    Refresh Local Node
+                 </button>
+                 <button onClick={handlePurgeNodeMCU} className="text-xs bg-red-500/10 text-red-400 border border-red-500/20 px-3 py-2 rounded-lg whitespace-nowrap hover:bg-red-500/20 transition-all font-bold">
+                    Emergency Wipe Device RAM
+                 </button>
+              </div>
+           </div>
+           
+           {offlineHubQueue.length === 0 ? (
+             <div className="glass-panel p-12 text-center text-slate-400 border-dashed border-white/10">
+               <Activity size={32} className="mx-auto mb-3 opacity-20" />
+               No offline patients on the NodeMCU. Click "Refresh Local Node".
+             </div>
+           ) : (
+             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+               {offlineHubQueue.map((p, index) => {
+                  const isCalled = p.status === 'Called';
+                  return (
+                    <div key={p.id} className={`glass-panel p-5 rounded-xl border transition-all relative overflow-hidden group ${isCalled ? 'border-amber-400/50 bg-amber-500/5 ring-1 ring-amber-400/30' : 'border-emerald-500/20 bg-white/5'}`}>
+                      {isCalled && <div className="absolute top-0 right-0 p-2 opacity-20 blur-[20px] bg-amber-500 w-32 h-32 rounded-full animate-pulse transition-opacity"></div>}
+                       <div className="flex justify-between items-start mb-1">
+                          <h4 className={`text-lg font-bold ${isCalled ? 'text-amber-400' : 'text-emerald-400'}`}># {p.patient_name}</h4>
+                          <span className={`px-2 py-0.5 rounded text-[10px] uppercase font-bold ${isCalled ? 'bg-amber-400 text-amber-950 animate-pulse' : 'bg-emerald-500/20 text-emerald-300'}`}>{p.status || 'Waiting'}</span>
+                       </div>
+                       
+                       <div className="flex items-center gap-2 mb-3">
+                          <span className="bg-white/5 px-2 py-0.5 rounded text-[10px] uppercase font-bold text-slate-400">{p.type}</span>
+                          <span className="text-xs font-mono text-slate-400">{p.id}</span>
+                       </div>
+                       <div className="space-y-1.5 mb-5 text-sm text-slate-300 relative z-10">
+                          {p.phone && <div className="flex items-center gap-2">📞 <span className="font-mono text-xs">{p.phone}</span></div>}
+                          <div className="flex items-center gap-2">👨‍⚕️ <span className="font-semibold">{p.doctor || 'Unknown'}</span></div>
+                          <div className="flex items-center gap-2">🧠 <span>{p.consultation_type || 'General'}</span></div>
+                       </div>
+                       
+                       <div className="flex gap-2 relative z-10">
+                          {!isCalled ? (
+                            <button onClick={() => handleOfflineAction(p.id, 'Called')} className="flex-1 bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-2 rounded shadow-md hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2 text-sm z-10">
+                               <ShieldCheck size={14} /> Call Patient Status
+                            </button>
+                          ) : (
+                            <>
+                              <button onClick={() => handleOfflineAction(p.id, 'Waiting')} className="flex-1 border border-white/10 hover:bg-white/5 text-slate-300 font-semibold py-2 rounded transition-all flex items-center justify-center gap-2 text-sm">
+                                 Undo
+                              </button>
+                              <button onClick={() => handleOfflineAction(p.id, 'delete')} className="flex-1 bg-sky-500 hover:bg-sky-600 text-white font-bold py-2 rounded shadow-md hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2 text-sm group">
+                                 <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" /> Completed
+                              </button>
+                            </>
+                          )}
+                       </div>
+                    </div>
+                  );
+               })}
+             </div>
+           )}
         </div>
       )}
     </div>

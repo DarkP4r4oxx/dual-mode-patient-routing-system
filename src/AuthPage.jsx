@@ -83,8 +83,8 @@ export default function AuthPage({ isDark, toggleTheme }) {
         {/* Logo */}
         <div className="text-center space-y-3">
           <div className="inline-flex items-center gap-2 cursor-pointer transition-transform hover:scale-105 active:scale-95" onClick={() => navigate('/')}>
-            <div className="w-10 h-10 rounded-xl bg-[#0ea5e9] flex items-center justify-center font-bold text-[var(--text-1)] shadow-lg shadow-[#0ea5e9]/30 text-xl">S</div>
-            <span className="text-2xl font-bold tracking-tight">SyncQ</span>
+            <div className="w-10 h-10 rounded-xl bg-[#0ea5e9] flex items-center justify-center font-bold text-[var(--text-1)] shadow-lg shadow-[#0ea5e9]/30 text-xl">H</div>
+            <span className="text-2xl font-bold tracking-tight">HyQ</span>
           </div>
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold text-[#0ea5e9] border"
             style={{ background: 'rgba(14,165,233,0.08)', borderColor: 'rgba(14,165,233,0.2)' }}>
@@ -92,7 +92,7 @@ export default function AuthPage({ isDark, toggleTheme }) {
           </div>
         </div>
 
-        <div className="glass-panel rounded-2xl p-8 space-y-5" style={S.card}>
+        <div className="neu-panel rounded-2xl p-8 space-y-5" style={S.card}>
           {/* Tab toggle */}
           <div className="flex rounded-xl p-1" style={S.tab}>
             {['login', 'register'].map(m => (
