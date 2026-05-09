@@ -2,43 +2,31 @@
 
 /* ── Theme Variables ──────────────────────────────── */
 :root {
-  --bg:          #0b1120;
-  --bg-2:        #1e293b;
-  --surface:     rgba(15, 23, 42, 0.65);
-  --border:      rgba(255, 255, 255, 0.08);
-  --border-2:    rgba(255, 255, 255, 0.14);
-  --text-1:      #ffffff;
-  --text-2:      #94a3b8;
-  --text-3:      #64748b;
-  --glow-1:      rgba(14, 165, 233, 0.18);
-  --glow-2:      rgba(99, 102, 241, 0.15);
-  --brand:       #0ea5e9;
-  --brand-hover: #0284c7;
-  --shadow:      0 12px 40px rgba(0, 0, 0, 0.5);
-}
-
-:root.light {
-  --bg:          #f4f8fc;
-  --bg-2:        #e6eef7;
+  --bg:          #ffffff;
+  --bg-2:        #f3f4f6;
   --surface:     rgba(255, 255, 255, 0.85);
-  --border:      rgba(14, 165, 233, 0.15);
-  --border-2:    rgba(14, 165, 233, 0.3);
-  --text-1:      #0f172a;
-  --text-2:      #334155;
-  --text-3:      #64748b;
-  --glow-1:      rgba(14, 165, 233, 0.12);
-  --glow-2:      rgba(99, 102, 241, 0.10);
-  --brand:       #0284c7;
-  --brand-hover: #0369a1;
-  --shadow:      0 8px 32px rgba(14, 165, 233, 0.12);
+  --border:      rgba(229, 231, 235, 1);
+  --border-2:    rgba(209, 213, 219, 1);
+  --text-1:      #111827;
+  --text-2:      #4b5563;
+  --text-3:      #9ca3af;
+  --glow-1:      rgba(37, 99, 235, 0.1);
+  --glow-2:      rgba(59, 130, 246, 0.05);
+  --brand:       #2563eb;
+  --brand-hover: #1d4ed8;
+  --shadow:      0 8px 30px rgba(0, 0, 0, 0.04);
 }
 
-/* ── Base ─────────────────────────────────────────── */
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   background-color: var(--bg);
   color: var(--text-1);
   margin: 0;
   min-height: 100vh;
+  overflow-x: hidden;
   transition: background-color 0.4s cubic-bezier(0.4, 0, 0.2, 1), color 0.4s ease;
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
   letter-spacing: -0.015em;

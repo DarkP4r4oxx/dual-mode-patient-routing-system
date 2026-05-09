@@ -3,7 +3,7 @@ import { BrowserRouter, Routes, Route, useNavigate, Navigate } from 'react-route
 import {
   Cloud, Copy, ArrowRight, AlertTriangle, ShieldCheck,
   WifiOff, Stethoscope, ChevronLeft, LogOut, User, Sun, Moon,
-  Clock, Users, Activity
+  Clock, Users, Activity, CheckCircle
 } from 'lucide-react';
 import { db, auth } from './firebaseClient';
 import { collection, addDoc, query, orderBy, serverTimestamp, onSnapshot, getDocs, doc, updateDoc } from 'firebase/firestore';
@@ -11,20 +11,18 @@ import { onAuthStateChanged, signOut } from 'firebase/auth';
 import AuthPage from './AuthPage';
 import DoctorAuthPage from './DoctorAuthPage';
 import LiveQueuePage from './LiveQueuePage';
+import AdminDashboard from './AdminDashboard';
 
-// ─── Doctor Directory ─────────────────────────────────────────────────────────
-const DOCTORS = [
-  { id: 'd1', name: 'Dr. Sharma', email: 'dr.sharma@hyq.com', specialty: 'General Medicine', status: 'Available', color: 'bg-sky-500', hours: { start: 9, end: 17 } },
-  { id: 'd2', name: 'Dr. Patil', email: 'dr.patil@hyq.com', specialty: 'Cardiology', status: 'Available', color: 'bg-rose-500', hours: { start: 10, end: 16 } },
-  { id: 'd3', name: 'Dr. Mehta', email: 'dr.mehta@hyq.com', specialty: 'Orthopedics', status: 'In Surgery', color: 'bg-amber-500', hours: { start: 9, end: 14 } },
-  { id: 'd4', name: 'Dr. Khan', email: 'dr.khan@hyq.com', specialty: 'Dermatology', status: 'Available', color: 'bg-emerald-500', hours: { start: 11, end: 18 } },
-  { id: 'd5', name: 'Dr. Reddy', email: 'dr.reddy@hyq.com', specialty: 'Pediatrics', status: 'Available', color: 'bg-purple-500', hours: { start: 9, end: 15 } },
-  { id: 'd6', name: 'Dr. Joshi', email: 'dr.joshi@hyq.com', specialty: 'ENT', status: 'On Leave', color: 'bg-orange-500', hours: { start: 9, end: 17 } },
-  { id: 'd7', name: 'Dr. Nair', email: 'dr.nair@hyq.com', specialty: 'General Medicine', status: 'Available', color: 'bg-teal-500', hours: { start: 8, end: 14 } },
-  { id: 'd8', name: 'Dr. Singh', email: 'dr.singh@hyq.com', specialty: 'Cardiology', status: 'Available', color: 'bg-indigo-500', hours: { start: 14, end: 20 } },
-];
-
-const SPECIALTIES = ['All', 'General Medicine', 'Cardiology', 'Orthopedics', 'Dermatology', 'Pediatrics', 'ENT'];
+export function useDoctors() {
+  const [doctors, setDoctors] = useState([]);
+  useEffect(() => {
+    const unsub = onSnapshot(collection(db, 'doctors'), (snap) => {
+      setDoctors(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+    });
+    return () => unsub();
+  }, []);
+  return doctors;
+}
 
 const SPECIALTY_ICONS = {
   'All': '🏥',
@@ -35,6 +33,9 @@ const SPECIALTY_ICONS = {
   'Pediatrics': '👶',
   'ENT': '👂',
 };
+
+// Fallback icon for dynamically added specialties
+const getIcon = (specialty) => SPECIALTY_ICONS[specialty] || '🩺';
 
 function generateSlots(doctor, consultType, dateStr) {
   const intervalMin = consultType === 'Showing Reports' ? 5 : 15;
@@ -148,30 +149,20 @@ function LoadingScreen() {
 
 // ─── App ──────────────────────────────────────────────────────────────────────
 export default function App() {
-  const [isDark, setIsDark] = useState(() => {
-    const saved = localStorage.getItem('HyQ-theme');
-    return saved ? saved === 'dark' : true;
-  });
-
-  useEffect(() => {
-    const root = document.documentElement;
-    if (isDark) { root.classList.remove('light'); } else { root.classList.add('light'); }
-    localStorage.setItem('HyQ-theme', isDark ? 'dark' : 'light');
-  }, [isDark]);
-
-  const toggleTheme = () => setIsDark(d => !d);
+  // Theme is strictly light now.
 
   return (
     <BrowserRouter>
       <div className="w-full min-h-screen flex flex-col font-sans selection:bg-[#0ea5e9] selection:text-white relative overflow-x-hidden" style={{background:'var(--bg)',color:'var(--text-1)'}}>
-        <div className="absolute top-1/4 left-1/4 w-[40rem] h-[40rem] bg-[#0ea5e9] rounded-full mix-blend-multiply filter blur-[128px] opacity-10 pointer-events-none" />
-        <div className="absolute bottom-1/4 right-1/4 w-[30rem] h-[30rem] bg-indigo-500 rounded-full mix-blend-multiply filter blur-[128px] opacity-10 pointer-events-none" />
+        <div className="fixed top-1/4 left-1/4 w-[40rem] h-[40rem] bg-[#0ea5e9] rounded-full mix-blend-multiply filter blur-[128px] opacity-10 pointer-events-none" />
+        <div className="fixed bottom-1/4 right-1/4 w-[30rem] h-[30rem] bg-indigo-500 rounded-full mix-blend-multiply filter blur-[128px] opacity-10 pointer-events-none" />
         <Routes>
-          <Route path="/login"        element={<AuthPage isDark={isDark} toggleTheme={toggleTheme} />} />
-          <Route path="/doctor-login" element={<DoctorAuthPage isDark={isDark} toggleTheme={toggleTheme} />} />
-          <Route path="/queue"        element={<LiveQueuePage isDark={isDark} toggleTheme={toggleTheme} />} />
-          <Route path="/"             element={<PatientPortal isDark={isDark} toggleTheme={toggleTheme} />} />
-          <Route path="/doctor"       element={<RequireDoctorAuth><DoctorDashboard isDark={isDark} toggleTheme={toggleTheme} /></RequireDoctorAuth>} />
+          <Route path="/login"        element={<AuthPage />} />
+          <Route path="/doctor-login" element={<DoctorAuthPage />} />
+          <Route path="/queue"        element={<LiveQueuePage />} />
+          <Route path="/"             element={<PatientPortal />} />
+          <Route path="/doctor"       element={<RequireDoctorAuth><DoctorDashboard /></RequireDoctorAuth>} />
+          <Route path="/admin"        element={<RequireDoctorAuth><AdminDashboard /></RequireDoctorAuth>} />
           <Route path="*"             element={<Navigate to="/" replace />} />
         </Routes>
       </div>
@@ -180,7 +171,7 @@ export default function App() {
 }
 
 // ─── Patient Portal ───────────────────────────────────────────────────────────
-function PatientPortal({ isDark, toggleTheme }) {
+function PatientPortal() {
   const [currentStep, setCurrentStep] = useState('LANDING');
   const [generatedToken, setGeneratedToken] = useState('');
   const [bookedSlot, setBookedSlot] = useState('');
@@ -197,45 +188,55 @@ function PatientPortal({ isDark, toggleTheme }) {
 
   return (
     <>
-      <header className="w-full glass-panel border-b px-6 py-3.5 flex items-center justify-between sticky top-0 z-50" style={{borderColor:'var(--border)'}}>
-        <div className="flex items-center space-x-2 cursor-pointer transition-transform hover:scale-105 active:scale-95" onClick={() => navigate('/')}>
-          <div className="w-8 h-8 rounded-lg bg-[#0ea5e9] flex items-center justify-center font-bold text-[var(--text-1)] shadow-lg shadow-[#0ea5e9]/20 text-sm">H</div>
-          <span className="text-lg font-bold tracking-tight" style={{color:'var(--text-1)'}}>HyQ</span>
+      <header className="absolute top-0 left-0 w-full px-6 lg:px-12 py-6 flex items-center justify-between z-50 bg-transparent">
+        {/* Left: Logo */}
+        <div className="flex items-center space-x-3 cursor-pointer group" onClick={() => { setCurrentStep('LANDING'); navigate('/'); }}>
+          <Cloud size={28} strokeWidth={1.5} className="text-slate-800 group-hover:scale-105 transition-transform" />
+          <span className="text-[22px] font-light tracking-wide text-slate-800">HyQ</span>
         </div>
-        <div className="flex items-center gap-2">
-          <div className="hidden sm:flex items-center space-x-1 rounded-full px-3 py-1.5 border text-xs" style={{background:'var(--bg-2)',borderColor:'var(--border)'}}>
-            {['EN', 'MH', 'HI'].map((l, i) => (
-              <React.Fragment key={l}>
-                {i > 0 && <span className="mx-1" style={{color:'var(--text-3)'}}>|</span>}
-                <button onClick={() => setLang(l)} className="px-1 transition-all font-semibold"
-                  style={{color: lang === l ? 'var(--brand)' : 'var(--text-3)'}}>{l}</button>
-              </React.Fragment>
-            ))}
+
+        {/* Right: Unified Pill */}
+        <div className="hidden sm:flex items-center bg-slate-100/90 backdrop-blur-md rounded-full p-1.5 shadow-sm border border-slate-200/50">
+          
+          {/* Navigation Links inside Pill */}
+          <div className="flex items-center px-4 gap-6 text-[11px] font-bold tracking-widest text-slate-600">
+            <button onClick={() => navigate('/queue')} className="hover:text-slate-900 transition-colors uppercase">
+              Live Queue
+            </button>
+            <div className="flex items-center gap-3">
+              {['EN', 'MH', 'HI'].map((l) => (
+                <button key={l} onClick={() => setLang(l)} className={`transition-colors uppercase ${lang === l ? 'text-slate-900' : 'hover:text-slate-900'}`}>
+                  {l}
+                </button>
+              ))}
+            </div>
           </div>
-          <button onClick={() => navigate('/queue')} className="hidden sm:block text-sm font-medium transition-colors hover:text-[#0ea5e9]" style={{color:'var(--text-2)'}}>{t.checkLive}</button>
-          <button onClick={toggleTheme} title="Toggle theme"
-            className="p-2 rounded-full border transition-all hover:scale-110 active:scale-95"
-            style={{background:'var(--bg-2)', borderColor:'var(--border)', color:'var(--text-2)'}}>
-            {isDark ? <Sun size={15} /> : <Moon size={15} />}
-          </button>
+
+          {/* Action Button inside Pill */}
           {user ? (
-            <div className="flex items-center gap-2 border rounded-full px-3 py-1.5" style={{background:'var(--bg-2)',borderColor:'var(--border)'}}>
-              <div className="w-6 h-6 rounded-full bg-[#0ea5e9] flex items-center justify-center text-xs font-bold text-white">
-                {user?.displayName?.[0]?.toUpperCase() || user?.email?.[0]?.toUpperCase() || 'U'}
-              </div>
-              <span className="text-xs hidden sm:block max-w-[100px] truncate" style={{color:'var(--text-2)'}}>{user?.displayName || user?.email?.split('@')[0]}</span>
-              <button onClick={handleSignOut} className="hover:text-red-400 transition-colors ml-1" style={{color:'var(--text-3)'}}><LogOut size={14} /></button>
+            <div className="flex items-center gap-3 rounded-full pl-3 pr-4 py-2 bg-slate-800 text-white shadow-sm ml-2">
+              <div className="text-xs font-bold truncate max-w-[100px]">{user?.displayName || user?.email?.split('@')[0]}</div>
+              <button onClick={handleSignOut} className="text-slate-300 hover:text-white transition-colors" title="Sign Out"><LogOut size={14} /></button>
             </div>
           ) : (
-            <button onClick={() => navigate('/login')} className="flex items-center gap-2 text-[#0ea5e9] border border-[#0ea5e9]/30 bg-[#0ea5e9]/10 hover:bg-[#0ea5e9]/20 px-3 py-1.5 rounded-full text-sm font-semibold transition-all">
-              <User size={14} /> Sign In
+            <button onClick={() => navigate('/login')} className="bg-slate-800 hover:bg-slate-900 text-white px-6 py-2.5 rounded-full text-[11px] font-bold tracking-widest uppercase transition-all ml-2 shadow-sm">
+              Sign In
             </button>
+          )}
+        </div>
+
+        {/* Mobile menu fallback (simplified) */}
+        <div className="sm:hidden flex items-center">
+          {user ? (
+            <button onClick={handleSignOut} className="p-2 text-slate-600"><LogOut size={20} /></button>
+          ) : (
+            <button onClick={() => navigate('/login')} className="text-sm font-bold text-slate-800">Sign In</button>
           )}
         </div>
       </header>
 
-      <main className="flex-1 flex flex-col items-center justify-center p-6 relative">
-        <div className="w-full max-w-2xl z-10">
+      <main className="flex-1 flex flex-col items-center justify-center p-4 sm:p-6 relative">
+        <div className={`w-full z-10 transition-all duration-500 ${currentStep === 'LANDING' ? 'max-w-6xl' : 'max-w-2xl'}`}>
           {currentStep === 'LANDING' && <HeroSection t={t} onNext={handleGoToBooking} />}
           {currentStep === 'BOOKING' && <BookingFlow t={t} user={user} onBack={() => setCurrentStep('LANDING')} onNext={(token, slot, date) => { setGeneratedToken(token); setBookedSlot(slot); setBookedDate(date); setCurrentStep('SUCCESS'); }} />}
           {currentStep === 'SUCCESS'  && <QueueTracker t={t} refCode={generatedToken} bookedSlot={bookedSlot} bookedDate={bookedDate} onReset={() => setCurrentStep('LANDING')} />}
@@ -249,56 +250,84 @@ function PatientPortal({ isDark, toggleTheme }) {
 function HeroSection({ t, onNext }) {
   const navigate = useNavigate();
   return (
-    <div className="text-center space-y-6 sm:space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
-      {/* Badge */}
-      <div className="inline-flex items-center gap-2 border px-4 py-1.5 rounded-full text-xs font-bold text-[#0ea5e9] mb-2" style={{background:'var(--glow-1)',borderColor:'var(--border-2)'}}>
-        <Activity size={13} className="animate-pulse" />
-        <span>Live Queue System • AI-Powered Scheduling</span>
+    <div className="flex flex-col lg:flex-row items-center justify-between gap-12 py-10 z-10 w-full animate-in fade-in slide-in-from-bottom-4 duration-700">
+      
+      {/* Left Column: Text */}
+      <div className="flex-1 text-left space-y-8">
+        <div className="inline-flex items-center gap-2 border px-4 py-1.5 rounded-full text-[10px] font-bold text-blue-600 bg-blue-50 border-blue-200 shadow-sm">
+          <Activity size={14} className="animate-pulse" />
+          <span className="tracking-widest uppercase">HyQ Innovation Clinic</span>
+        </div>
+
+        <div className="space-y-5">
+          <h1 className="text-5xl sm:text-6xl md:text-7xl font-black tracking-tighter leading-[1.05] text-slate-900 text-balance">
+            Transforming the <br/>
+            <span className="text-transparent bg-clip-text bg-gradient-to-br from-blue-600 to-indigo-500">
+              Medical Paradigm.
+            </span>
+          </h1>
+          <p className="text-lg md:text-xl leading-relaxed text-slate-500 font-medium max-w-xl">
+            Experience seamless healthcare. Book your exact time slot and walk in the moment your doctor is ready. Zero waiting rooms.
+          </p>
+        </div>
+
+        <div className="flex flex-col sm:flex-row gap-4 pt-4">
+          <button onClick={onNext} className="group relative inline-flex items-center justify-center gap-3 bg-slate-900 hover:bg-slate-800 text-white px-8 py-4 rounded-full font-bold text-sm tracking-widest uppercase transition-all shadow-xl hover:shadow-slate-500/25 active:scale-[0.98] w-full sm:w-auto overflow-hidden">
+            <div className="absolute inset-0 w-full h-full bg-white/10 blur-md transform -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-700"></div>
+            <span className="relative z-10">{t.bookBtn}</span>
+            <ArrowRight size={18} className="relative z-10 group-hover:translate-x-1 transition-transform" />
+          </button>
+          <button onClick={() => navigate('/doctor-login')} className="px-8 py-4 rounded-full text-xs uppercase tracking-widest font-bold transition-all hover:bg-slate-50 text-slate-500 hover:text-slate-900 w-full sm:w-auto shadow-sm border border-transparent hover:border-slate-200">
+            {t.doctorPortal}
+          </button>
+        </div>
+
+        {/* Stats Row underneath */}
+        <div className="flex flex-wrap gap-10 pt-8 border-t border-slate-200">
+          {[{val:'< 2 min', label:'Token Generation'}, {val:'Real-Time', label:'Queue Tracking'}, {val:'Seamless', label:'Check-ins'}].map((s, i) => (
+            <div key={s.label}>
+              <div className="text-2xl font-black text-blue-600 mb-1">{s.val}</div>
+              <div className="text-xs font-semibold uppercase tracking-wider text-slate-400">{s.label}</div>
+            </div>
+          ))}
+        </div>
       </div>
 
-      {/* Headline */}
-      <div className="space-y-3 px-2">
-        <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight leading-tight text-balance" style={{color:'var(--text-1)'}}>
-          Your Doctor Is Ready —{' '}
-          <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#0ea5e9] via-cyan-400 to-sky-300">
-            Are You?
-          </span>
-        </h1>
-        <p className="text-sm md:text-lg max-w-lg mx-auto leading-relaxed" style={{color:'var(--text-2)'}}>
-          HyQ eliminates waiting rooms. Book your slot, track your position live,
-          and walk in <strong style={{color:'var(--text-1)'}}>exactly when the doctor is ready</strong> for you.
-        </p>
-      </div>
-
-      {/* Stats Row */}
-      <div className="flex justify-center flex-wrap gap-4 sm:gap-8 py-1">
-        {[{icon:'⚡', val:'< 2 min', label:'Token Generation'}, {icon:'📍', val:'Real-Time', label:'Queue Tracking'}, {icon:'🏥', val:'8 Doctors', label:'6 Specialties'}].map(s => (
-          <div key={s.label} className="text-center">
-            <div className="text-lg md:text-xl mb-0.5">{s.icon}</div>
-            <div className="text-xs md:text-sm font-bold" style={{color:'var(--text-1)'}}>{s.val}</div>
-            <div className="text-[10px] md:text-xs" style={{color:'var(--text-3)'}}>{s.label}</div>
+      {/* Right Column: Image */}
+      <div className="flex-1 relative w-full max-w-lg lg:max-w-none">
+        <div className="absolute inset-0 bg-blue-500/20 rounded-[3rem] blur-3xl transform rotate-3"></div>
+        <img 
+          src="https://images.unsplash.com/photo-1622253692010-333f2da6031d?q=80&w=800&auto=format&fit=crop" 
+          alt="Medical Professional" 
+          className="relative z-10 w-full h-auto rounded-[2rem] shadow-2xl object-cover border border-white/10"
+        />
+        
+        {/* Floating elements */}
+        <div className="absolute -bottom-6 -left-6 sm:-bottom-8 sm:-left-8 z-20 bg-white p-5 rounded-3xl shadow-xl shadow-slate-200/50 border border-slate-100 animate-bounce" style={{animationDuration: '3s'}}>
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-2xl bg-emerald-50 border border-emerald-100 flex items-center justify-center text-emerald-600 shadow-sm">
+              <CheckCircle size={22} strokeWidth={2.5} />
+            </div>
+            <div className="pr-3">
+              <div className="text-sm font-black text-slate-900 tracking-tight">Available Now</div>
+              <div className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mt-1">Dr. Sarah Jenkins</div>
+            </div>
           </div>
-        ))}
+        </div>
       </div>
 
-      {/* CTA Buttons */}
-      <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-        <button onClick={onNext} className="group relative inline-flex items-center justify-center gap-2 bg-[#0ea5e9] hover:bg-[#0284c7] text-[var(--text-1)] px-8 py-4 rounded-xl font-bold text-lg transition-all shadow-[0_8px_30px_-4px_rgba(14,165,233,0.5)] hover:shadow-[0_12px_45px_-6px_rgba(14,165,233,0.65)] hover:-translate-y-1 active:translate-y-0 w-full sm:w-auto overflow-hidden">
-          <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 blur-sm mix-blend-overlay"></div>
-          <span className="relative z-10">{t.bookBtn}</span>
-          <ArrowRight size={20} className="relative z-10 group-hover:translate-x-1.5 transition-transform duration-300" />
-        </button>
-        <button onClick={() => navigate('/doctor-login')} className="px-6 py-4 rounded-xl text-sm font-semibold transition-colors hover:bg-white/5 border border-transparent hover:border-[var(--border)]" style={{color:'var(--text-2)'}}>
-          {t.doctorPortal}
-        </button>
-      </div>
     </div>
   );
 }
 
 // ─── Booking Flow (3-Step Wizard) ─────────────────────────────────────────────
-function BookingFlow({ t, user, onNext, onBack }) {
-  const [step, setStep] = useState(1); // 1=Specialty, 2=Doctor, 3=Details
+function BookingFlow({ t, user, onBack, onNext }) {
+  const DOCTORS = useDoctors();
+  
+  // Dynamically compute available specialties from active doctors
+  const SPECIALTIES = ['All', ...new Set(DOCTORS.map(d => d.specialty))];
+  
+  const [step, setStep] = useState(1);
   const [selectedSpecialty, setSelectedSpecialty] = useState('All');
   const [selectedDoctor, setSelectedDoctor] = useState(null);
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
@@ -346,68 +375,64 @@ function BookingFlow({ t, user, onNext, onBack }) {
         setError('Could not save appointment. Check your connection and try again.');
       }
       setIsSubmitting(false);
-      return; // Don't proceed — force user to fix the issue
+      return;
     }
   };
 
-  // Step progress bar
   const stepLabels = [t.selectSpecialty, t.selectDoctor, t.bookingDetails];
 
   return (
     <div className="space-y-6 animate-in fade-in duration-300">
-      {/* Progress Bar */}
-      <div className="flex items-center gap-2">
-        <button onClick={step === 1 ? onBack : () => setStep(s => s - 1)} className="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-slate-400 hover:text-white transition-all shrink-0">
-          <ChevronLeft size={18} />
+      <div className="flex items-center gap-3">
+        <button onClick={step === 1 ? onBack : () => setStep(s => s - 1)} className="p-2 rounded-xl bg-white hover:bg-slate-50 border border-slate-200 text-slate-500 hover:text-slate-900 transition-all shrink-0 shadow-sm">
+          <ChevronLeft size={18} strokeWidth={2.5} />
         </button>
-        <div className="flex-1 flex items-center gap-2">
+        <div className="flex-1 flex items-center gap-3">
           {[1, 2, 3].map((s) => (
             <React.Fragment key={s}>
-              <div className={`flex items-center gap-1.5 ${s <= step ? 'text-[#0ea5e9]' : 'text-slate-500'} transition-colors`}>
-                <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold border transition-all ${s < step ? 'bg-[#0ea5e9] border-[#0ea5e9] text-white' : s === step ? 'border-[#0ea5e9] text-[#0ea5e9]' : 'border-slate-600 text-slate-600'}`}>
+              <div className={`flex items-center gap-2 ${s <= step ? 'text-blue-600' : 'text-slate-400'} transition-colors`}>
+                <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold border-2 transition-all ${s < step ? 'bg-blue-600 border-blue-600 text-white' : s === step ? 'border-blue-600 text-blue-600' : 'border-slate-200 text-slate-400'}`}>
                   {s < step ? '✓' : s}
                 </div>
-                <span className="text-xs hidden sm:block">{stepLabels[s - 1]}</span>
+                <span className="text-xs font-bold uppercase tracking-widest hidden sm:block">{stepLabels[s - 1]}</span>
               </div>
-              {s < 3 && <div className={`flex-1 h-px transition-all ${s < step ? 'bg-[#0ea5e9]' : 'bg-slate-700'}`} />}
+              {s < 3 && <div className={`flex-1 h-0.5 rounded-full transition-all ${s < step ? 'bg-blue-600' : 'bg-slate-100'}`} />}
             </React.Fragment>
           ))}
         </div>
       </div>
 
-      {/* Step 1: Specialty */}
       {step === 1 && (
-        <div className="glass-panel rounded-2xl p-6 space-y-5">
+        <div className="bg-white border border-slate-100 shadow-xl shadow-slate-200/50 rounded-3xl p-6 sm:p-8 space-y-6">
           <div>
-            <h2 className="text-xl font-bold">{t.selectSpecialty}</h2>
-            <p className="text-sm text-slate-400 mt-1">Choose a medical specialty to find the right doctor</p>
+            <h2 className="text-xl font-bold text-slate-900">{t.selectSpecialty}</h2>
+            <p className="text-sm text-slate-500 mt-1">Choose a medical specialty to find the right doctor</p>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
             {SPECIALTIES.filter(s => s !== 'All').map(spec => (
               <button
                 key={spec}
                 onClick={() => { setSelectedSpecialty(spec); setStep(2); setSelectedDoctor(null); setSelectedSlot(''); }}
-                className="p-4 rounded-xl border border-white/10 bg-white/3 hover:bg-[#0ea5e9]/10 hover:border-[#0ea5e9]/40 transition-all text-left group"
+                className="p-5 rounded-2xl border border-slate-100 bg-slate-50 hover:bg-slate-100 hover:border-slate-300 transition-all text-left group shadow-sm hover:shadow-md"
               >
-                <div className="text-2xl mb-2">{SPECIALTY_ICONS[spec]}</div>
-                <div className="text-sm font-semibold text-white group-hover:text-[#0ea5e9] transition-colors">{spec}</div>
-                <div className="text-xs text-slate-500 mt-0.5">{DOCTORS.filter(d => d.specialty === spec).length} doctors</div>
+                <div className="text-2xl mb-3">{getIcon(spec)}</div>
+                <div className="text-sm font-bold text-slate-800 group-hover:text-slate-900 transition-colors">{spec}</div>
+                <div className="text-xs text-slate-500 mt-1 font-medium">{DOCTORS.filter(d => d.specialty === spec).length} doctors</div>
               </button>
             ))}
           </div>
         </div>
       )}
 
-      {/* Step 2: Doctor */}
       {step === 2 && (
-        <div className="glass-panel rounded-2xl p-6 space-y-5">
+        <div className="bg-white border border-slate-100 shadow-xl shadow-slate-200/50 rounded-3xl p-6 sm:p-8 space-y-6">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-xl font-bold">{t.selectDoctor}</h2>
-              <p className="text-sm text-slate-400 mt-1">{selectedSpecialty} • {filteredDoctors.length} available</p>
+              <h2 className="text-xl font-bold text-slate-900">{t.selectDoctor}</h2>
+              <p className="text-sm text-slate-500 mt-1 font-medium">{selectedSpecialty} • {filteredDoctors.length} available</p>
             </div>
             <button onClick={() => { setSelectedSpecialty('All'); setStep(1); }}
-              className="text-xs text-[#0ea5e9] hover:underline">Change Specialty</button>
+              className="text-xs font-bold text-blue-600 hover:text-blue-700 transition-colors bg-blue-50 px-3 py-1.5 rounded-full">Change Specialty</button>
           </div>
           <div className="space-y-3">
             {filteredDoctors.map(doc => (
@@ -415,24 +440,24 @@ function BookingFlow({ t, user, onNext, onBack }) {
                 key={doc.id}
                 onClick={() => { if (doc.status !== 'On Leave') { setSelectedDoctor(doc); setStep(3); setSelectedSlot(''); setConsultType(''); } }}
                 disabled={doc.status === 'On Leave'}
-                className={`w-full flex items-center gap-4 p-4 rounded-xl border transition-all text-left
-                  ${doc.status === 'On Leave' ? 'opacity-40 cursor-not-allowed border-white/5 bg-white/2' :
-                    'border-white/10 bg-white/3 hover:bg-[#0ea5e9]/10 hover:border-[#0ea5e9]/40 group'}`}
+                className={`w-full flex items-center gap-4 p-4 rounded-2xl border transition-all text-left shadow-sm
+                  ${doc.status === 'On Leave' ? 'opacity-50 cursor-not-allowed border-slate-100 bg-slate-50' :
+                    'border-slate-100 bg-slate-50 hover:bg-white hover:border-slate-300 hover:shadow-md group'}`}
               >
-                <div className={`w-12 h-12 rounded-xl ${doc.color} flex items-center justify-center text-white font-bold text-lg shrink-0 shadow-lg`}>
-                  {doc.name.split(' ')[1][0]}
+                <div className={`w-12 h-12 rounded-xl ${doc.color} flex items-center justify-center text-white font-bold text-lg shrink-0 shadow-inner`}>
+                  {doc.name.split(' ')[1]?.[0] || doc.name[0]}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <div className="font-bold text-white group-hover:text-[#0ea5e9] transition-colors">{doc.name}</div>
-                  <div className="text-xs text-slate-400">{doc.specialty}</div>
-                  <div className="text-xs text-slate-500 mt-0.5">
-                    {doc.hours.start}:00 — {doc.hours.end}:00
+                  <div className="font-bold text-slate-900 group-hover:text-blue-600 transition-colors">{doc.name}</div>
+                  <div className="text-xs font-semibold text-slate-500">{doc.specialty}</div>
+                  <div className="text-xs text-slate-400 mt-1 font-medium">
+                    {doc.hours?.start || 9}:00 — {doc.hours?.end || 17}:00
                   </div>
                 </div>
-                <div className={`text-xs font-semibold px-2.5 py-1 rounded-full border shrink-0
-                  ${doc.status === 'Available' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' :
-                    doc.status === 'In Surgery' ? 'bg-amber-500/10 text-amber-400 border-amber-500/20' :
-                      'bg-red-500/10 text-red-400 border-red-500/20'}`}>
+                <div className={`text-[10px] uppercase font-bold tracking-wider px-3 py-1.5 rounded-full border shrink-0
+                  ${doc.status === 'Available' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' :
+                    doc.status === 'In Surgery' ? 'bg-amber-50 text-amber-600 border-amber-100' :
+                      'bg-red-50 text-red-600 border-red-100'}`}>
                   {doc.status}
                 </div>
               </button>
@@ -441,64 +466,68 @@ function BookingFlow({ t, user, onNext, onBack }) {
         </div>
       )}
 
-      {/* Step 3: Details + Time Slot */}
       {step === 3 && selectedDoctor && (
-        <div className="glass-panel rounded-2xl p-6 space-y-5">
-          {/* Selected doctor summary */}
-          <div className="flex items-center gap-3 pb-4 border-b border-white/10">
-            <div className={`w-10 h-10 rounded-xl ${selectedDoctor.color} flex items-center justify-center text-white font-bold shrink-0`}>
-              {selectedDoctor.name.split(' ')[1][0]}
+        <div className="bg-white border border-slate-100 shadow-xl shadow-slate-200/50 rounded-3xl p-6 sm:p-8 space-y-6">
+          <div className="flex items-center gap-4 pb-5 border-b border-slate-100">
+            <div className={`w-12 h-12 rounded-xl ${selectedDoctor.color} flex items-center justify-center text-white font-bold shrink-0 shadow-inner`}>
+              {selectedDoctor.name.split(' ')[1]?.[0] || selectedDoctor.name[0]}
             </div>
             <div>
-              <div className="font-bold">{selectedDoctor.name}</div>
-              <div className="text-xs text-slate-400">{selectedDoctor.specialty}</div>
+              <div className="font-bold text-slate-900 text-lg">{selectedDoctor.name}</div>
+              <div className="text-xs font-semibold text-slate-500">{selectedDoctor.specialty}</div>
             </div>
-            <button onClick={() => setStep(2)} className="ml-auto text-xs text-[#0ea5e9] hover:underline">Change</button>
+            <button onClick={() => setStep(2)} className="ml-auto text-xs font-bold text-blue-600 hover:text-blue-700 bg-blue-50 px-3 py-1.5 rounded-full transition-colors">Change</button>
           </div>
 
-          {error && <div className="bg-red-500/10 border border-red-500/20 text-red-400 text-sm rounded-lg px-4 py-2">{error}</div>}
+          {error && <div className="bg-red-50 border border-red-100 text-red-600 text-sm font-semibold rounded-xl px-4 py-3">{error}</div>}
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Consultation Type First (needed for slot generation) */}
+          <form onSubmit={handleSubmit} className="space-y-6">
             <div>
-              <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2 block">{t.consultType}</label>
+              <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-3 block">{t.consultType}</label>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {[{ val: 'New Checkup', label: t.newCheckup, dur: '15 min', icon: '🏥' },
                 { val: 'Showing Reports', label: t.showingReports, dur: '5 min', icon: '⚡' }].map(opt => (
                   <button type="button" key={opt.val}
                     onClick={() => { setConsultType(opt.val); setSelectedSlot(''); }}
-                    className={`p-3 rounded-xl border text-left transition-all ${consultType === opt.val ? 'bg-[#0ea5e9]/20 border-[#0ea5e9] text-white' : 'border-white/10 bg-white/3 text-slate-300 hover:border-white/30'}`}
+                    className={`p-4 rounded-2xl border text-left transition-all shadow-sm ${consultType === opt.val ? 'bg-slate-800 border-slate-800 text-white shadow-md' : 'border-slate-200 bg-slate-50 text-slate-700 hover:bg-white hover:border-slate-300'}`}
                   >
-                    <div className="text-xl mb-1">{opt.icon}</div>
-                    <div className="text-sm font-semibold">{opt.label}</div>
-                    <div className="text-xs text-slate-500">{opt.dur}</div>
+                    <div className="text-2xl mb-2">{opt.icon}</div>
+                    <div className="text-sm font-bold">{opt.label}</div>
+                    <div className={`text-xs mt-1 font-medium ${consultType === opt.val ? 'text-slate-300' : 'text-slate-500'}`}>{opt.dur}</div>
                   </button>
                 ))}
               </div>
             </div>
 
-            {/* Date Selection */}
             {consultType && (
               <div className="animate-in fade-in slide-in-from-top-2 duration-300">
-                <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2 block">Select Date</label>
+                <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-3 block">Select Date</label>
                 <input type="date" min={new Date().toISOString().split('T')[0]} value={selectedDate} 
                   onChange={e => { setSelectedDate(e.target.value); setSelectedSlot(''); }}
-                  className="w-full bg-black/20 border border-white/10 rounded-xl px-4 py-3 text-slate-300 focus:outline-none focus:ring-2 focus:ring-[#0ea5e9] text-sm [color-scheme:dark] transition-all" />
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3.5 text-slate-900 font-semibold focus:outline-none focus:ring-2 focus:ring-slate-800 focus:border-transparent transition-all shadow-sm" />
               </div>
             )}
 
-            {/* Time Slot Grid */}
             {consultType && selectedDate && (
               <div className="animate-in fade-in slide-in-from-top-2 duration-300">
-                <div className="flex items-center justify-between mb-2">
-                  <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">{t.selectSlot}</label>
-                  {slots.length === 0 && <span className="text-xs text-amber-400">No remaining slots for today</span>}
+                {selectedDoctor.isDelayed && (
+                  <div className="bg-red-50 border border-red-100 rounded-xl p-4 flex items-start gap-3 mb-5 shadow-sm">
+                     <AlertTriangle size={18} className="text-red-500 mt-0.5" />
+                     <div>
+                       <p className="text-sm font-bold text-red-700">Doctor Delayed</p>
+                       <p className="text-xs font-medium text-red-600 mt-1">{selectedDoctor.delayMessage || 'This doctor is currently unavailable or delayed.'}</p>
+                     </div>
+                  </div>
+                )}
+                <div className="flex items-center justify-between mb-3">
+                  <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{t.selectSlot}</label>
+                  {slots.length === 0 && <span className="text-xs font-bold text-amber-500">No remaining slots</span>}
                 </div>
                 <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2 max-h-48 overflow-y-auto pr-1">
                   {slots.map(slot => (
                     <button type="button" key={slot}
                       onClick={() => setSelectedSlot(slot)}
-                      className={`py-2 px-1 rounded-lg text-xs font-medium border transition-all text-center ${selectedSlot === slot ? 'bg-[#0ea5e9] border-[#0ea5e9] text-white' : 'border-white/10 bg-white/3 text-slate-300 hover:border-[#0ea5e9]/40 hover:text-white'}`}
+                      className={`py-2.5 px-2 rounded-xl text-xs font-bold border transition-all text-center shadow-sm ${selectedSlot === slot ? 'bg-slate-800 border-slate-800 text-white' : 'border-slate-200 bg-slate-50 text-slate-700 hover:bg-white hover:border-slate-300 hover:text-slate-900'}`}
                     >
                       {slot}
                     </button>
@@ -508,25 +537,19 @@ function BookingFlow({ t, user, onNext, onBack }) {
             )}
 
             {/* Patient Details */}
-            <div className="space-y-3">
+            <div className="space-y-4 pt-2">
               <input type="text" required placeholder={t.patientName} value={patientName}
                 onChange={(e) => setPatientName(e.target.value)}
-                className="w-full bg-black/20 border border-white/10 rounded-xl px-4 py-3 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-[#0ea5e9] text-sm" />
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3.5 placeholder:text-slate-400 text-slate-900 font-semibold focus:outline-none focus:ring-2 focus:ring-slate-800 focus:border-transparent transition-all shadow-sm" />
               <input type="tel" required placeholder={t.phone} value={phone}
                 onChange={(e) => setPhone(e.target.value)}
-                className="w-full bg-black/20 border border-white/10 rounded-xl px-4 py-3 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-[#0ea5e9] text-sm" />
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3.5 placeholder:text-slate-400 text-slate-900 font-semibold focus:outline-none focus:ring-2 focus:ring-slate-800 focus:border-transparent transition-all shadow-sm" />
             </div>
 
             <button type="submit" disabled={isSubmitting || !selectedSlot || !consultType}
-              className="w-full bg-[#0ea5e9] hover:bg-[#0284c7] disabled:opacity-40 text-white font-semibold py-3.5 rounded-xl transition-all shadow-[0_4px_14px_rgba(14,165,233,0.3)] flex justify-center items-center gap-2">
-              {isSubmitting ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : t.confirmBtn}
+              className="w-full bg-slate-800 hover:bg-slate-900 disabled:opacity-50 disabled:hover:bg-slate-800 text-white font-bold py-4 rounded-xl transition-all shadow-md active:scale-[0.98] flex justify-center items-center gap-2 uppercase tracking-widest text-xs mt-4">
+              {isSubmitting ? <div className="w-5 h-5 border-2 border-slate-400 border-t-white rounded-full animate-spin" /> : t.confirmBtn}
             </button>
-
-            <div className="text-center">
-              <a href="#" className="inline-flex items-center gap-1.5 text-xs text-red-400 hover:text-red-300 transition-colors">
-                <AlertTriangle size={13} />{t.emergency}
-              </a>
-            </div>
           </form>
         </div>
       )}
@@ -576,29 +599,74 @@ function QueueTracker({ t, refCode, onReset, bookedSlot, bookedDate }) {
   }
 
   return (
-    <div className="glass-panel rounded-2xl p-6 sm:p-8 space-y-6 animate-in slide-in-from-right-8 duration-500">
-      <div className="text-center space-y-2">
-        <div className="inline-flex items-center justify-center w-12 h-12 rounded-full border mb-2" style={{ background: 'var(--glow-1)', borderColor: 'var(--border-2)', color: 'var(--brand)' }}>
-          <ShieldCheck size={24} />
+    <div className="bg-white border border-slate-100 shadow-xl shadow-slate-200/50 rounded-3xl p-8 space-y-8 animate-in slide-in-from-right-8 duration-500 max-w-md mx-auto">
+      <div className="text-center space-y-3">
+        <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-emerald-50 text-emerald-600 mb-2 shadow-inner border border-emerald-100">
+          <ShieldCheck size={28} strokeWidth={2.5} />
         </div>
-        <h2 className="text-xl font-bold">{t.successTitle}</h2>
-        <p className="text-sm" style={{ color: 'var(--text-2)' }}>{t.successSub}</p>
+        <h2 className="text-2xl font-black text-slate-900 tracking-tight">{t.successTitle}</h2>
+        <p className="text-sm font-medium text-slate-500">{t.successSub}</p>
       </div>
-      <div className="rounded-xl p-6 text-center space-y-4 border" style={{ background: 'var(--bg-2)', borderColor: 'var(--border)' }}>
+      <div className="rounded-2xl p-6 text-center space-y-6 bg-slate-50 border border-slate-100 shadow-sm">
         <div>
-          <p className="text-xs uppercase tracking-wider font-semibold mb-1" style={{ color: 'var(--text-3)' }}>{t.ewt}</p>
-          <div className="text-5xl font-black tracking-tighter" style={{ color: 'var(--text-1)' }}>{formatEWT(ewt)}</div>
+          <p className="text-[10px] uppercase tracking-widest font-bold text-slate-400 mb-2">{t.ewt}</p>
+          <div className="text-6xl font-black tracking-tighter text-slate-900">{formatEWT(ewt)}</div>
         </div>
-        <div className="flex items-center justify-between border rounded-lg p-3" style={{ background: 'var(--bg-2)', borderColor: 'var(--border)' }}>
-          <span className="text-sm font-mono" style={{ color: 'var(--text-2)' }}>{t.bookingRef}: {refCode}</span>
-          <button onClick={() => navigator.clipboard.writeText(refCode)} className="p-1 transition-colors hover:text-[#0ea5e9]" style={{ color: 'var(--text-3)' }}>
+        <div className="flex items-center justify-between bg-white border border-slate-200 rounded-xl p-3 shadow-sm">
+          <span className="text-sm font-bold text-slate-700 tracking-wide pl-2">{t.bookingRef}: {refCode}</span>
+          <button onClick={() => navigator.clipboard.writeText(refCode)} className="p-2 bg-slate-50 rounded-lg transition-colors hover:bg-slate-200 hover:text-slate-900 text-slate-500">
             <Copy size={16} />
           </button>
         </div>
       </div>
-      <button onClick={onReset} className="w-full text-sm font-medium transition-colors hover:text-red-400 p-2" style={{ color: 'var(--text-3)' }}>
+      <button onClick={onReset} className="w-full text-xs font-bold uppercase tracking-widest transition-colors text-slate-400 hover:text-red-500 p-3 hover:bg-red-50 rounded-xl">
         {t.cancelBtn}
       </button>
+    </div>
+  );
+}
+
+// ─── Analytics / Reports Component ──────────────────────────────────────────
+function AnalyticsTab({ currentDoctor }) {
+  const [completed, setCompleted] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!currentDoctor) return;
+    const q = query(collection(db, 'appointments'), orderBy('created_at', 'asc'));
+    const unsub = onSnapshot(q, (snap) => {
+      const data = snap.docs
+        .map(d => ({ ...d.data() }))
+        .filter(d => d.doctor === currentDoctor.name && d.status === 'Completed');
+      setCompleted(data);
+      setLoading(false);
+    });
+    return () => unsub();
+  }, [currentDoctor]);
+
+  if (loading) return <div className="text-center p-16"><div className="w-10 h-10 rounded-full border-4 border-slate-200 border-t-slate-800 animate-spin mx-auto"/></div>;
+
+  const todayStr = new Date().toISOString().split('T')[0];
+  const todayCount = completed.filter(c => (c.booking_date || new Date(c.created_at).toISOString().split('T')[0]) === todayStr).length;
+
+  return (
+    <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-500">
+       <div className="bg-white p-8 rounded-3xl border border-slate-100 shadow-xl shadow-slate-200/50">
+          <h2 className="text-xl font-black mb-6 flex items-center gap-3 text-slate-900 tracking-tight">
+            <div className="p-2 bg-blue-50 text-blue-600 rounded-xl border border-blue-100"><Activity size={20} strokeWidth={2.5}/></div>
+            Performance Analytics
+          </h2>
+          <div className="grid sm:grid-cols-2 gap-5">
+             <div className="bg-slate-50 border border-slate-200 p-6 rounded-2xl shadow-sm">
+                <p className="text-[10px] uppercase font-bold tracking-widest text-slate-500 mb-2">Patients Seen Today</p>
+                <div className="text-5xl font-black tracking-tighter text-blue-600">{todayCount}</div>
+             </div>
+             <div className="bg-slate-50 border border-slate-200 p-6 rounded-2xl shadow-sm">
+                <p className="text-[10px] uppercase font-bold tracking-widest text-slate-500 mb-2">Total Lifetime Patients</p>
+                <div className="text-5xl font-black tracking-tighter text-emerald-600">{completed.length}</div>
+             </div>
+          </div>
+       </div>
     </div>
   );
 }
@@ -607,13 +675,14 @@ function QueueTracker({ t, refCode, onReset, bookedSlot, bookedDate }) {
 function DoctorDashboard() {
   const navigate = useNavigate();
   const user = auth.currentUser;
+  const DOCTORS = useDoctors();
   const [queue, setQueue] = useState([]);
   const [connectionState, setConnectionState] = useState('SYNCING');
   const [loading, setLoading] = useState(true);
   const [filterDoctor, setFilterDoctor] = useState('All');
   const [filterDate, setFilterDate] = useState(new Date().toISOString().split('T')[0]);
   
-  const [activeTab, setActiveTab] = useState('LIVE'); // 'LIVE' | 'OFFLINE'
+  const [activeTab, setActiveTab] = useState('LIVE'); // 'LIVE' | 'OFFLINE' | 'REPORTS'
   const [offlineHubQueue, setOfflineHubQueue] = useState([]);
 
   const currentDoctor = DOCTORS.find(d => d.email === user?.email?.toLowerCase());
@@ -762,52 +831,66 @@ function DoctorDashboard() {
   const handleSignOut = async () => { await signOut(auth); navigate('/doctor-login'); };
 
   return (
-    <div className="flex-1 flex flex-col p-6 max-w-6xl mx-auto w-full z-10">
+    <div className="flex-1 flex flex-col p-6 max-w-6xl mx-auto w-full z-10 font-sans">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 pb-4 border-b border-white/10 gap-4">
-        <div className="flex items-center space-x-3">
-          <div className="w-10 h-10 rounded-xl bg-slate-800 border border-slate-700 flex items-center justify-center text-[#0ea5e9]"><Stethoscope size={20} /></div>
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 pb-5 border-b border-slate-200 gap-4">
+        <div className="flex items-center space-x-4">
+          <div className="w-12 h-12 rounded-[0.8rem] bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-600 shadow-sm"><Stethoscope size={24} /></div>
           <div>
-            <h1 className="text-2xl font-bold">HyQ Unified Dashboard</h1>
-            <p className="text-slate-400 text-sm">
-              {currentDoctor ? `${currentDoctor.name} · ${currentDoctor.specialty}` : 'Doctor Terminal (SJF Protocol)'}
+            <h1 className="text-2xl font-black text-slate-900 tracking-tight">HyQ Unified Dashboard</h1>
+            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">
+              {currentDoctor ? `${currentDoctor.name} · ${currentDoctor.specialty}` : 'Doctor Terminal'}
             </p>
           </div>
         </div>
         <div className="flex items-center gap-3 flex-wrap">
-          {connectionState === 'ONLINE' && <div className="flex items-center gap-1.5 bg-sky-500/10 text-sky-400 px-3 py-1.5 rounded-full text-xs font-semibold border border-sky-500/20"><Cloud size={13} />🌐 Cloud Connected</div>}
-          {connectionState === 'OFFLINE' && <div className="flex items-center gap-1.5 bg-amber-500/10 text-amber-400 px-3 py-1.5 rounded-full text-xs font-semibold border border-amber-500/20"><WifiOff size={13} />📡 Local Only</div>}
+          {currentDoctor && (
+             <button onClick={async () => {
+                const newStatus = !currentDoctor.isDelayed;
+                let msg = '';
+                if (newStatus) {
+                   msg = prompt("Enter delay reason (e.g. In emergency surgery, Returning in 2 hrs):");
+                   if (msg === null) return;
+                }
+                await updateDoc(doc(db, 'doctors', currentDoctor.id), { isDelayed: newStatus, delayMessage: msg || '' });
+             }} className={`flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold border transition-all uppercase tracking-widest shadow-sm ${currentDoctor.isDelayed ? 'bg-red-50 text-red-600 border-red-100 shadow-red-500/10' : 'bg-slate-50 text-slate-500 border-slate-200 hover:text-slate-800'}`}>
+                <AlertTriangle size={14} /> {currentDoctor.isDelayed ? 'Mark Available' : 'Set Unavailable/Delay'}
+             </button>
+          )}
+          {connectionState === 'ONLINE' && <div className="flex items-center gap-1.5 bg-blue-50 text-blue-600 px-4 py-2 rounded-full text-[10px] font-bold border border-blue-100 uppercase tracking-widest shadow-sm"><Cloud size={14} />🌐 Cloud Connected</div>}
+          {connectionState === 'OFFLINE' && <div className="flex items-center gap-1.5 bg-amber-50 text-amber-600 px-4 py-2 rounded-full text-[10px] font-bold border border-amber-100 uppercase tracking-widest shadow-sm"><WifiOff size={14} />📡 Local Only</div>}
           
-          <button onClick={handleSyncNodeMCU} disabled={syncingNode} className="flex items-center gap-2 text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 px-3 py-1.5 rounded-full text-xs font-bold transition-all disabled:opacity-50">
+          <button onClick={handleSyncNodeMCU} disabled={syncingNode} className="flex items-center gap-2 text-emerald-600 bg-emerald-50 hover:bg-emerald-100 border border-emerald-100 px-4 py-2 rounded-full text-[10px] uppercase tracking-widest font-bold transition-all shadow-sm disabled:opacity-50">
             {syncingNode ? <div className="w-3 h-3 rounded-full border-2 border-emerald-400 border-t-transparent animate-spin"/> : <Activity size={14}/>}
             {syncingNode ? 'Connecting...' : 'Connect to NodeMCU Server'}
           </button>
 
-          <div className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-full px-3 py-1.5">
-            <User size={13} className="text-slate-400" />
-            <span className="text-xs text-slate-300">{user?.email?.split('@')[0]}</span>
+          <div className="flex items-center gap-2 bg-slate-50 border border-slate-200 shadow-inner rounded-full px-4 py-2">
+            <User size={14} className="text-slate-400" />
+            <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{user?.email?.split('@')[0]}</span>
           </div>
-          <button onClick={handleSignOut} className="text-xs bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 text-red-400 px-3 py-1.5 rounded-full flex items-center gap-1.5 transition-colors">
-            <LogOut size={12} />Sign Out
+          <button onClick={handleSignOut} className="text-[10px] font-bold uppercase tracking-widest bg-red-50 hover:bg-red-100 border border-red-100 text-red-600 px-4 py-2 rounded-full flex items-center gap-1.5 transition-colors shadow-sm">
+            <LogOut size={14} />Sign Out
           </button>
         </div>
       </div>
 
       {/* Main Tabs */}
-      <div className="flex gap-4 mb-4 border-b border-white/10 pb-2">
-        <button onClick={() => setActiveTab('LIVE')} className={`px-4 py-2 font-bold text-sm tracking-wide transition-all ${activeTab === 'LIVE' ? 'text-[#0ea5e9] border-b-2 border-[#0ea5e9]' : 'text-slate-500 hover:text-slate-300'}`}>Live Cloud Queue</button>
-        <button onClick={() => setActiveTab('OFFLINE')} className={`px-4 py-2 font-bold text-sm tracking-wide transition-all ${activeTab === 'OFFLINE' ? 'text-emerald-400 border-b-2 border-emerald-400' : 'text-slate-500 hover:text-slate-300'} flex items-center gap-2`}>
-          Local Offline Hub {offlineHubQueue.length > 0 && <span className="bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded-full text-xs">{offlineHubQueue.length}</span>}
+      <div className="flex gap-6 mb-6 border-b border-slate-200 pb-2">
+        <button onClick={() => setActiveTab('LIVE')} className={`px-2 py-2 font-bold text-xs uppercase tracking-widest transition-all ${activeTab === 'LIVE' ? 'text-slate-900 border-b-2 border-slate-900' : 'text-slate-400 hover:text-slate-700'}`}>Live Cloud Queue</button>
+        <button onClick={() => setActiveTab('OFFLINE')} className={`px-2 py-2 font-bold text-xs uppercase tracking-widest transition-all ${activeTab === 'OFFLINE' ? 'text-emerald-600 border-b-2 border-emerald-600' : 'text-slate-400 hover:text-slate-700'} flex items-center gap-2`}>
+          Local Offline Hub {offlineHubQueue.length > 0 && <span className="bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full text-[10px]">{offlineHubQueue.length}</span>}
         </button>
+        <button onClick={() => setActiveTab('REPORTS')} className={`px-2 py-2 font-bold text-xs uppercase tracking-widest transition-all ${activeTab === 'REPORTS' ? 'text-purple-600 border-b-2 border-purple-600' : 'text-slate-400 hover:text-slate-700'}`}>Analytics & Reports</button>
       </div>
 
-      {activeTab === 'LIVE' ? (
+      {activeTab === 'REPORTS' ? <AnalyticsTab currentDoctor={currentDoctor} /> : activeTab === 'LIVE' ? (
         <>
           {/* Filters: Date & DoctorTabs */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-5">
-            <div className="flex gap-2 overflow-x-auto pb-2 shrink-0">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+            <div className="flex gap-2.5 overflow-x-auto pb-2 shrink-0">
               <button onClick={() => setFilterDoctor('All')}
-                className={`px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap border transition-all ${filterDoctor === 'All' ? 'bg-[#0ea5e9] text-white border-[#0ea5e9]' : 'bg-white/5 text-slate-400 border-white/10 hover:text-white'}`}>
+                className={`px-4 py-2 rounded-full text-[10px] font-bold uppercase tracking-widest whitespace-nowrap border transition-all shadow-sm ${filterDoctor === 'All' ? 'bg-slate-800 text-white border-slate-800' : 'bg-white text-slate-500 border-slate-200 hover:text-slate-800 hover:bg-slate-50'}`}>
                 All Patients ({queue.filter(q => (q.booking_date || new Date().toISOString().split('T')[0]) === filterDate).length})
               </button>
           {DOCTORS.map(doc => {
@@ -815,8 +898,8 @@ function DoctorDashboard() {
             if (count === 0 && filterDoctor !== doc.name) return null; // hide empty doctors unless selected
             return (
               <button key={doc.id} onClick={() => setFilterDoctor(doc.name)}
-                className={`px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap border flex items-center gap-1.5 transition-all ${filterDoctor === doc.name ? 'bg-[#0ea5e9] text-white border-[#0ea5e9]' : 'bg-white/5 text-slate-400 border-white/10 hover:text-white'}`}>
-                <div className={`w-2 h-2 rounded-full ${doc.color}`} />{doc.name.split(' ')[1]} ({count})
+                className={`px-4 py-2 rounded-full text-[10px] font-bold uppercase tracking-widest whitespace-nowrap border flex items-center gap-2 transition-all shadow-sm ${filterDoctor === doc.name ? 'bg-slate-800 text-white border-slate-800' : 'bg-white text-slate-500 border-slate-200 hover:text-slate-800 hover:bg-slate-50'}`}>
+                <div className={`w-2.5 h-2.5 rounded-full ${doc.color} shadow-inner`} />{doc.name.split(' ')[1]} ({count})
               </button>
             );
           })}
@@ -824,25 +907,25 @@ function DoctorDashboard() {
         
         <div className="shrink-0">
           <input type="date" value={filterDate} onChange={e => setFilterDate(e.target.value)}
-            className="bg-black/20 border border-white/10 rounded-xl px-3 py-2 text-slate-300 focus:outline-none focus:ring-1 focus:ring-[#0ea5e9] text-sm [color-scheme:dark]" />
+            className="bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-800 text-sm font-bold shadow-sm" />
         </div>
       </div>
 
       {/* Queue */}
       {loading ? (
-        <div className="glass-panel rounded-2xl p-12 flex flex-col items-center text-slate-400">
-          <div className="w-8 h-8 rounded-full border-2 border-slate-400 border-t-transparent animate-spin mb-4" />
-          <p>Fetching live queue from Firebase...</p>
+        <div className="bg-white border border-slate-100 shadow-xl shadow-slate-200/50 rounded-3xl p-16 flex flex-col items-center text-slate-500">
+          <div className="w-10 h-10 rounded-full border-4 border-slate-200 border-t-slate-800 animate-spin mb-4" />
+          <p className="font-bold text-sm tracking-wide">Fetching live queue from Firebase...</p>
         </div>
       ) : displayQueue.length === 0 ? (
-        <div className="glass-panel rounded-2xl p-12 text-center text-slate-400">
-          <p className="text-lg font-medium">No patients in queue.</p>
-          <p className="text-sm mt-2">Queue updates automatically as patients book.</p>
+        <div className="bg-slate-50/50 border-2 border-dashed border-slate-200 rounded-3xl p-16 text-center text-slate-400">
+          <p className="text-xl font-black text-slate-800 tracking-tight">No patients in queue.</p>
+          <p className="text-xs font-bold uppercase tracking-widest mt-2">Queue updates automatically as patients book.</p>
         </div>
       ) : (
         <div className="space-y-4">
           {/* DESKTOP HEADER */}
-          <div className="hidden md:grid grid-cols-12 gap-4 px-4 text-xs font-semibold uppercase tracking-wider text-slate-500">
+          <div className="hidden md:grid grid-cols-12 gap-4 px-6 py-2 text-[10px] font-bold uppercase tracking-widest text-slate-400">
             <div className="col-span-1">Pos</div>
             <div className="col-span-3">Patient</div>
             <div className="col-span-2">Doctor</div>
@@ -850,73 +933,73 @@ function DoctorDashboard() {
             <div className="col-span-2">Time Slot</div>
             <div className="col-span-2 text-right">Action</div>
           </div>
-          <div className="space-y-3">
+          <div className="space-y-4">
             {displayQueue.map((patient, i) => {
               const isPriority = (patient.consultation_type || '').includes('Showing Reports');
               const doc = DOCTORS.find(d => d.name === patient.doctor);
               return (
-                <div key={patient.docId || i} className="glass-panel rounded-xl p-4 hover:bg-white/5 border border-white/5 transition-all">
+                <div key={patient.docId || i} className="bg-white border border-slate-100 shadow-sm rounded-2xl p-5 hover:shadow-md hover:border-slate-200 transition-all">
                   
                   {/* MOBILE VIEW */}
-                  <div className="md:hidden flex flex-col gap-3">
+                  <div className="md:hidden flex flex-col gap-4">
                     <div className="flex justify-between items-start">
-                      <div className="flex items-center gap-3">
-                        <div className="min-w-[2rem] h-8 rounded-full bg-black/30 flex items-center justify-center font-bold font-mono text-sm">{i + 1}</div>
+                      <div className="flex items-center gap-4">
+                        <div className="min-w-[2.5rem] h-10 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-center font-black font-mono text-lg shadow-inner text-slate-900">{i + 1}</div>
                         <div>
-                          <p className="font-bold leading-tight">{patient.patient_name || 'Unknown'}</p>
-                          <p className="text-xs text-slate-400 font-mono mt-0.5">{patient.id || '--'} • {patient.time_slot || 'Any'}</p>
+                          <p className="font-black text-slate-900 tracking-tight leading-tight">{patient.patient_name || 'Unknown'}</p>
+                          <p className="text-xs text-slate-400 font-mono font-bold mt-0.5">{patient.id || '--'} • {patient.time_slot || 'Any'}</p>
                         </div>
                       </div>
                       <div className="shrink-0 mt-1">
                         {isPriority
-                          ? <span className="inline-flex px-2 py-0.5 rounded text-[10px] font-medium bg-amber-500/10 text-amber-400 border border-amber-500/20">⚡ 5m</span>
-                          : <span className="inline-flex px-2 py-0.5 rounded text-[10px] font-medium bg-sky-500/10 text-sky-400 border border-sky-500/20">🏥 15m</span>
+                          ? <span className="inline-flex px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest bg-amber-50 text-amber-600 border border-amber-100 shadow-sm">⚡ 5m</span>
+                          : <span className="inline-flex px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest bg-blue-50 text-blue-600 border border-blue-100 shadow-sm">🏥 15m</span>
                         }
                       </div>
                     </div>
-                    <div className="flex justify-between items-center bg-black/10 rounded-lg p-2 mt-1">
-                       <div className="flex items-center gap-2">
-                         {doc && <div className={`w-5 h-5 rounded-md ${doc.color} flex items-center justify-center text-[var(--text-1)] text-xs font-bold`}>{doc.name.split(' ')[1][0]}</div>}
-                         <span className="text-xs text-slate-300 truncate">{patient.doctor} <span className="text-slate-500 hidden sm:inline">• {patient.specialty}</span></span>
+                    <div className="flex justify-between items-center bg-slate-50 rounded-xl p-3 border border-slate-100 shadow-inner">
+                       <div className="flex items-center gap-3">
+                         {doc && <div className={`w-7 h-7 rounded-lg ${doc.color} flex items-center justify-center text-white text-xs font-bold shadow-sm`}>{doc.name.split(' ')[1][0]}</div>}
+                         <span className="text-xs font-bold text-slate-700 truncate">{patient.doctor} <span className="text-slate-400 hidden sm:inline font-semibold">• {patient.specialty}</span></span>
                        </div>
                     </div>
                     <div className="flex justify-end w-full pt-1">
                       {patient.status === 'Called' ? (
-                        <button onClick={() => handleUpdateStatus(patient.docId, 'Completed')} className="w-full text-sm bg-emerald-500/20 hover:bg-emerald-500/40 text-emerald-400 border border-emerald-500/30 px-3 py-2 rounded-lg transition-colors font-semibold">Complete Appointment</button>
+                        <button onClick={() => handleUpdateStatus(patient.docId, 'Completed')} className="w-full text-xs uppercase tracking-widest bg-emerald-50 hover:bg-emerald-100 text-emerald-600 border border-emerald-100 px-4 py-3 rounded-xl transition-colors font-bold shadow-sm">Complete Appointment</button>
                       ) : (
-                        <button onClick={() => handleUpdateStatus(patient.docId, 'Called')} className="w-full text-sm bg-[#0ea5e9]/20 hover:bg-[#0ea5e9]/40 text-[#0ea5e9] border border-[#0ea5e9]/30 px-3 py-2 rounded-lg transition-colors font-semibold">Call Patient In</button>
+                        <button onClick={() => handleUpdateStatus(patient.docId, 'Called')} className="w-full text-xs uppercase tracking-widest bg-slate-800 hover:bg-slate-900 text-white border border-slate-800 px-4 py-3 rounded-xl transition-colors font-bold shadow-md active:scale-[0.98]">Call Patient In</button>
                       )}
                     </div>
                   </div>
 
                   {/* DESKTOP VIEW */}
-                  <div className="hidden md:grid grid-cols-12 gap-4 items-center">
+                  <div className="hidden md:grid grid-cols-12 gap-4 items-center px-2">
                     <div className="col-span-1">
-                      <div className="w-8 h-8 rounded-full bg-black/30 flex items-center justify-center font-bold font-mono text-sm">{i + 1}</div>
+                      <div className="w-10 h-10 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-center font-black font-mono text-lg shadow-inner text-slate-900">{i + 1}</div>
                     </div>
-                    <div className="col-span-3">
-                      <p className="font-bold truncate">{patient.patient_name || 'Unknown'}</p>
-                      <p className="text-xs text-slate-400 font-mono">{patient.id || '--'}</p>
+                    <div className="col-span-3 pl-2">
+                      <p className="font-black text-slate-900 tracking-tight">{patient.patient_name || 'Unknown'}</p>
+                      <p className="text-[11px] text-slate-400 font-mono font-bold mt-0.5">{patient.id || '--'}</p>
                     </div>
                     <div className="col-span-2">
-                      <div className="flex items-center gap-1.5">
-                        {doc && <div className={`w-5 h-5 rounded-md ${doc.color} flex items-center justify-center text-[var(--text-1)] text-xs font-bold`}>{doc.name.split(' ')[1][0]}</div>}
-                        <span className="text-xs text-slate-300 truncate">{patient.doctor || '--'}</span>
+                      <div className="flex items-center gap-2.5">
+                        {doc && <div className={`w-6 h-6 rounded-lg ${doc.color} flex items-center justify-center text-white text-[10px] font-bold shadow-sm`}>{doc.name.split(' ')[1][0]}</div>}
+                        <span className="text-xs font-bold text-slate-700 truncate">{patient.doctor || '--'}</span>
                       </div>
-                      <p className="text-xs text-slate-500">{patient.specialty || ''}</p>
+                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1 ml-8">{patient.specialty || ''}</p>
                     </div>
                     <div className="col-span-2">
                       {isPriority
-                        ? <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-amber-500/10 text-amber-400 border border-amber-500/20">⚡ Reports (5m)</span>
-                        : <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-sky-500/10 text-sky-400 border border-sky-500/20">🏥 Checkup (15m)</span>
+                        ? <span className="inline-flex items-center px-3 py-1.5 rounded-full text-[10px] uppercase tracking-widest font-bold bg-amber-50 text-amber-600 border border-amber-100 shadow-sm">⚡ Reports (5m)</span>
+                        : <span className="inline-flex items-center px-3 py-1.5 rounded-full text-[10px] uppercase tracking-widest font-bold bg-blue-50 text-blue-600 border border-blue-100 shadow-sm">🏥 Checkup (15m)</span>
                       }
                     </div>
-                    <div className="col-span-2 text-sm text-slate-300">{patient.time_slot || 'Any'}</div>
+                    <div className="col-span-2 text-sm font-bold text-slate-700">{patient.time_slot || 'Any'}</div>
                     <div className="col-span-2 text-right">
                       {patient.status === 'Called' ? (
-                        <button onClick={() => handleUpdateStatus(patient.docId, 'Completed')} className="text-sm bg-emerald-500/20 hover:bg-emerald-500/40 text-emerald-400 border border-emerald-500/30 px-3 py-1.5 rounded-lg transition-colors font-semibold">Complete</button>
+                        <button onClick={() => handleUpdateStatus(patient.docId, 'Completed')} className="text-[10px] uppercase tracking-widest bg-emerald-50 hover:bg-emerald-100 text-emerald-600 border border-emerald-100 px-4 py-2 rounded-xl transition-colors font-bold shadow-sm">Complete</button>
                       ) : (
-                        <button onClick={() => handleUpdateStatus(patient.docId, 'Called')} className="text-sm bg-[#0ea5e9]/20 hover:bg-[#0ea5e9]/40 text-[#0ea5e9] border border-[#0ea5e9]/30 px-3 py-1.5 rounded-lg transition-colors font-semibold">Call In</button>
+                        <button onClick={() => handleUpdateStatus(patient.docId, 'Called')} className="text-[10px] uppercase tracking-widest bg-slate-800 hover:bg-slate-900 text-white border border-slate-800 px-4 py-2 rounded-xl transition-colors font-bold shadow-md active:scale-[0.98]">Call In</button>
                       )}
                     </div>
                   </div>
@@ -929,60 +1012,60 @@ function DoctorDashboard() {
       )}
       </>
       ) : (
-        <div className="space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-500">
-           <div className="glass-panel p-6 rounded-2xl flex flex-col md:flex-row items-start md:items-center justify-between gap-4 border border-emerald-500/20 bg-emerald-500/5">
+        <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-500">
+           <div className="bg-emerald-50 p-6 rounded-3xl flex flex-col md:flex-row items-start md:items-center justify-between gap-5 border border-emerald-100 shadow-sm">
               <div>
-                <h3 className="text-xl font-bold text-emerald-400">Independent Local Server Hub</h3>
-                <p className="text-sm text-emerald-400/70">Connect to the NodeMCU WiFi to directly control the local queuing system. Patients' phones will blink locally!</p>
+                <h3 className="text-xl font-black text-emerald-700 tracking-tight">Independent Local Server Hub</h3>
+                <p className="text-xs font-bold text-emerald-600/80 uppercase tracking-widest mt-1">Connect to the NodeMCU WiFi to directly control the local queuing system. Patients' phones will blink locally!</p>
               </div>
-              <div className="flex gap-2">
-                 <button onClick={handleSyncNodeMCU} className="text-xs bg-emerald-500 text-white font-bold px-4 py-2 rounded-lg whitespace-nowrap shadow-[0_0_15px_rgba(16,185,129,0.3)] hover:scale-105 transition-all">
+              <div className="flex gap-3">
+                 <button onClick={handleSyncNodeMCU} className="text-[10px] bg-emerald-600 text-white font-bold uppercase tracking-widest px-5 py-3 rounded-xl whitespace-nowrap shadow-md hover:bg-emerald-700 active:scale-[0.98] transition-all">
                     Refresh Local Node
                  </button>
-                 <button onClick={handlePurgeNodeMCU} className="text-xs bg-red-500/10 text-red-400 border border-red-500/20 px-3 py-2 rounded-lg whitespace-nowrap hover:bg-red-500/20 transition-all font-bold">
+                 <button onClick={handlePurgeNodeMCU} className="text-[10px] bg-red-50 text-red-600 border border-red-100 px-4 py-3 rounded-xl whitespace-nowrap hover:bg-red-100 transition-all font-bold uppercase tracking-widest shadow-sm">
                     Emergency Wipe Device RAM
                  </button>
               </div>
            </div>
            
            {offlineHubQueue.length === 0 ? (
-             <div className="glass-panel p-12 text-center text-slate-400 border-dashed border-white/10">
-               <Activity size={32} className="mx-auto mb-3 opacity-20" />
-               No offline patients on the NodeMCU. Click "Refresh Local Node".
+             <div className="bg-slate-50/50 p-16 text-center text-slate-400 border-2 border-dashed border-slate-200 rounded-3xl">
+               <Activity size={48} className="mx-auto mb-4 opacity-20" />
+               <p className="font-bold uppercase tracking-widest text-xs">No offline patients on the NodeMCU. Click "Refresh Local Node".</p>
              </div>
            ) : (
-             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
                {offlineHubQueue.map((p, index) => {
                   const isCalled = p.status === 'Called';
                   return (
-                    <div key={p.id} className={`glass-panel p-5 rounded-xl border transition-all relative overflow-hidden group ${isCalled ? 'border-amber-400/50 bg-amber-500/5 ring-1 ring-amber-400/30' : 'border-emerald-500/20 bg-white/5'}`}>
-                      {isCalled && <div className="absolute top-0 right-0 p-2 opacity-20 blur-[20px] bg-amber-500 w-32 h-32 rounded-full animate-pulse transition-opacity"></div>}
-                       <div className="flex justify-between items-start mb-1">
-                          <h4 className={`text-lg font-bold ${isCalled ? 'text-amber-400' : 'text-emerald-400'}`}># {p.patient_name}</h4>
-                          <span className={`px-2 py-0.5 rounded text-[10px] uppercase font-bold ${isCalled ? 'bg-amber-400 text-amber-950 animate-pulse' : 'bg-emerald-500/20 text-emerald-300'}`}>{p.status || 'Waiting'}</span>
+                    <div key={p.id} className={`bg-white p-6 rounded-3xl border transition-all relative overflow-hidden group shadow-sm hover:shadow-md ${isCalled ? 'border-amber-200 bg-amber-50/50' : 'border-slate-100 hover:border-slate-200'}`}>
+                      {isCalled && <div className="absolute top-0 right-0 p-2 opacity-10 blur-[20px] bg-amber-500 w-32 h-32 rounded-full animate-pulse transition-opacity"></div>}
+                       <div className="flex justify-between items-start mb-2">
+                          <h4 className={`text-xl font-black tracking-tight ${isCalled ? 'text-amber-600' : 'text-slate-900'}`}># {p.patient_name}</h4>
+                          <span className={`px-3 py-1 rounded-full text-[10px] uppercase font-bold tracking-widest shadow-sm ${isCalled ? 'bg-amber-100 text-amber-700 animate-pulse border border-amber-200' : 'bg-slate-100 text-slate-600 border border-slate-200'}`}>{p.status || 'Waiting'}</span>
                        </div>
                        
-                       <div className="flex items-center gap-2 mb-3">
-                          <span className="bg-white/5 px-2 py-0.5 rounded text-[10px] uppercase font-bold text-slate-400">{p.type}</span>
-                          <span className="text-xs font-mono text-slate-400">{p.id}</span>
+                       <div className="flex items-center gap-2 mb-4">
+                          <span className="bg-slate-50 border border-slate-200 px-3 py-1 rounded-lg text-[10px] uppercase font-bold text-slate-500 tracking-widest shadow-inner">{p.type}</span>
+                          <span className="text-[11px] font-bold font-mono text-slate-400">{p.id}</span>
                        </div>
-                       <div className="space-y-1.5 mb-5 text-sm text-slate-300 relative z-10">
-                          {p.phone && <div className="flex items-center gap-2">📞 <span className="font-mono text-xs">{p.phone}</span></div>}
-                          <div className="flex items-center gap-2">👨‍⚕️ <span className="font-semibold">{p.doctor || 'Unknown'}</span></div>
-                          <div className="flex items-center gap-2">🧠 <span>{p.consultation_type || 'General'}</span></div>
+                       <div className="space-y-2 mb-6 text-sm text-slate-600 relative z-10">
+                          {p.phone && <div className="flex items-center gap-3">📞 <span className="font-mono text-xs font-bold">{p.phone}</span></div>}
+                          <div className="flex items-center gap-3">👨‍⚕️ <span className="font-bold text-slate-900">{p.doctor || 'Unknown'}</span></div>
+                          <div className="flex items-center gap-3">🧠 <span className="font-semibold text-slate-700">{p.consultation_type || 'General'}</span></div>
                        </div>
                        
-                       <div className="flex gap-2 relative z-10">
+                       <div className="flex gap-3 relative z-10">
                           {!isCalled ? (
-                            <button onClick={() => handleOfflineAction(p.id, 'Called')} className="flex-1 bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-2 rounded shadow-md hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2 text-sm z-10">
-                               <ShieldCheck size={14} /> Call Patient Status
+                            <button onClick={() => handleOfflineAction(p.id, 'Called')} className="flex-1 bg-slate-800 hover:bg-slate-900 text-white font-bold py-3 rounded-xl shadow-md active:scale-[0.98] transition-all flex items-center justify-center gap-2 text-[10px] uppercase tracking-widest z-10">
+                               <ShieldCheck size={14} /> Call Patient
                             </button>
                           ) : (
                             <>
-                              <button onClick={() => handleOfflineAction(p.id, 'Waiting')} className="flex-1 border border-white/10 hover:bg-white/5 text-slate-300 font-semibold py-2 rounded transition-all flex items-center justify-center gap-2 text-sm">
+                              <button onClick={() => handleOfflineAction(p.id, 'Waiting')} className="flex-1 border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 font-bold py-3 rounded-xl transition-all flex items-center justify-center gap-2 text-[10px] uppercase tracking-widest shadow-sm">
                                  Undo
                               </button>
-                              <button onClick={() => handleOfflineAction(p.id, 'delete')} className="flex-1 bg-sky-500 hover:bg-sky-600 text-white font-bold py-2 rounded shadow-md hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2 text-sm group">
+                              <button onClick={() => handleOfflineAction(p.id, 'delete')} className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-xl shadow-md active:scale-[0.98] transition-all flex items-center justify-center gap-2 text-[10px] uppercase tracking-widest group">
                                  <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" /> Completed
                               </button>
                             </>

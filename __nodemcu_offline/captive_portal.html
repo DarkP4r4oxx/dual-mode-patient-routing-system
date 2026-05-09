@@ -3,19 +3,19 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>SyncQ Local Clinic</title>
+<title>HyQ Local Clinic</title>
 <style>
   :root {
-    --bg: #0b1120;
-    --surface: rgba(15, 23, 42, 0.65);
-    --border: rgba(255, 255, 255, 0.08);
-    --border-hl: rgba(14, 165, 233, 0.3);
-    --text-1: #ffffff;
-    --text-2: #94a3b8;
-    --glow: rgba(14, 165, 233, 0.2);
-    --brand: #0ea5e9;
-    --brand-h: #0284c7;
-    --panel-radius: 20px;
+    --bg: #f8fafc;
+    --surface: #ffffff;
+    --border: #f1f5f9;
+    --border-hl: #e0f2fe;
+    --text-1: #0f172a;
+    --text-2: #64748b;
+    --glow: #f0f9ff;
+    --brand: #2563eb;
+    --brand-h: #1d4ed8;
+    --panel-radius: 24px;
     --font: system-ui, -apple-system, sans-serif;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -32,8 +32,8 @@
     overflow-x: hidden;
   }
   /* Decorative blobs */
-  .blob1 { position: absolute; top: 10%; left: -10%; width: 300px; height: 300px; background: var(--brand); border-radius: 50%; filter: blur(80px); opacity: 0.15; z-index: -1; }
-  .blob2 { position: absolute; bottom: 10%; right: -10%; width: 250px; height: 250px; background: #6366f1; border-radius: 50%; filter: blur(80px); opacity: 0.15; z-index: -1; }
+  .blob1 { position: fixed; top: 10%; left: -10%; width: 300px; height: 300px; background: var(--brand); border-radius: 50%; filter: blur(80px); opacity: 0.1; z-index: -1; }
+  .blob2 { position: fixed; bottom: 10%; right: -10%; width: 250px; height: 250px; background: #6366f1; border-radius: 50%; filter: blur(80px); opacity: 0.1; z-index: -1; }
   
   .container {
     width: 100%;
@@ -43,12 +43,10 @@
   }
   .glass-panel {
     background: var(--surface);
-    backdrop-filter: blur(24px);
-    -webkit-backdrop-filter: blur(24px);
     border: 1px solid var(--border);
     border-radius: var(--panel-radius);
-    padding: 24px;
-    box-shadow: 0 12px 40px rgba(0,0,0,0.5);
+    padding: 32px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.05);
     margin-bottom: 20px;
     animation: fade-in 0.4s ease forwards;
   }
@@ -56,39 +54,43 @@
   @keyframes fade-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
   .header { text-align: center; margin-bottom: 30px; }
-  .header h1 { font-size: 28px; letter-spacing: -0.5px; margin-bottom: 8px; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 8px;}
+  .header h1 { font-size: 32px; letter-spacing: -1px; margin-bottom: 8px; font-weight: 900; display: flex; align-items: center; justify-content: center; gap: 8px; color: var(--text-1);}
   .header h1 span { color: var(--brand); }
   .header div.badge { 
-    display: inline-block; background: var(--glow); border: 1px solid var(--border-hl); color: var(--brand);
-    border-radius: 50px; padding: 4px 12px; font-size: 11px; font-weight: 700; text-transform: uppercase;
+    display: inline-block; background: #eff6ff; border: 1px solid #bfdbfe; color: #1d4ed8;
+    border-radius: 50px; padding: 4px 16px; font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px;
   }
   
   .btn {
     width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px;
-    background: rgba(255,255,255,0.03); border: 1px solid var(--border);
-    padding: 16px; border-radius: 12px; color: var(--text-1); font-size: 15px; font-weight: 600;
-    margin-bottom: 12px; cursor: pointer; transition: 0.2s ease;
+    background: var(--bg); border: 1px solid #e2e8f0;
+    padding: 16px; border-radius: 16px; color: var(--text-2); font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px;
+    margin-bottom: 12px; cursor: pointer; transition: 0.2s ease; box-shadow: 0 2px 5px rgba(0,0,0,0.02);
   }
+  .btn:hover { background: #f1f5f9; color: var(--text-1); border-color: #cbd5e1; }
   .btn:active { transform: scale(0.98); }
-  .btn.primary { background: var(--brand); border-color: var(--brand); box-shadow: 0 4px 15px rgba(14, 165, 233, 0.4); }
-  .btn.primary:active { background: var(--brand-h); }
+  .btn.primary { background: #0f172a; border-color: #0f172a; color: white; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); }
+  .btn.primary:hover { background: #1e293b; }
+  .btn.primary:active { background: #000000; }
   
   .view { display: none; }
   .view.active { display: block; }
   
-  label { font-size: 12px; color: var(--text-2); font-weight: 600; text-transform: uppercase; margin-bottom: 6px; display: block; }
+  label { font-size: 10px; color: var(--text-2); font-weight: 800; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; display: block; }
   input, select {
-    width: 100%; padding: 14px; background: rgba(0,0,0,0.2); border: 1px solid var(--border);
-    border-radius: 12px; color: var(--text-1); font-size: 14px; margin-bottom: 16px; font-family: var(--font);
+    width: 100%; padding: 14px 16px; background: var(--bg); border: 1px solid #e2e8f0;
+    border-radius: 12px; color: var(--text-1); font-size: 14px; margin-bottom: 20px; font-family: var(--font); font-weight: 600; transition: all 0.2s;
   }
-  input:focus, select:focus { outline: none; border-color: var(--brand); box-shadow: 0 0 0 3px var(--glow); }
+  input::placeholder { color: #94a3b8; font-weight: 500; }
+  input:focus, select:focus { outline: none; border-color: var(--text-1); box-shadow: 0 0 0 3px #f1f5f9; background: #ffffff; }
 
   .success-box { text-align: center; }
-  .success-box .id { font-size: 42px; font-weight: 900; color: var(--text-1); line-height: 1; margin: 10px 0; }
-  .success-box .ewt { font-size: 18px; color: var(--brand); font-weight: bold; margin-bottom: 20px;}
+  .success-box .id { font-size: 48px; font-weight: 900; color: var(--text-1); letter-spacing: -2px; margin: 10px 0; }
+  .success-box .ewt { font-size: 14px; color: var(--brand); font-weight: 800; margin-bottom: 20px; text-transform: uppercase; letter-spacing: 1px;}
   
-  .back-link { text-align: center; font-size: 13px; color: var(--text-2); margin-top: 10px; cursor: pointer; }
-  .loader { border: 3px solid rgba(255,255,255,0.1); border-top: 3px solid var(--text-1); border-radius: 50%; width: 20px; height: 20px; animation: spin 1s linear infinite; display: none; }
+  .back-link { text-align: center; font-size: 11px; color: var(--text-2); font-weight: 800; text-transform: uppercase; letter-spacing: 1px; margin-top: 10px; cursor: pointer; transition: 0.2s; padding: 10px; }
+  .back-link:hover { color: #ef4444; }
+  .loader { border: 3px solid rgba(255,255,255,0.2); border-top: 3px solid #ffffff; border-radius: 50%; width: 20px; height: 20px; animation: spin 1s linear infinite; display: none; }
   @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 </style>
 </head>
@@ -100,14 +102,14 @@
 <div class="container">
   <div class="header">
     <div class="badge">Local Network</div>
-    <h1>Sync<span>Q</span></h1>
+    <h1>HyQ</h1>
   </div>
 
   <!-- VIEW: WELCOME -->
   <div id="view-welcome" class="view active">
     <div class="glass-panel text-center">
-      <h2 style="font-size: 18px; margin-bottom: 8px;">Welcome to the Clinic</h2>
-      <p style="font-size: 14px; color: var(--text-2); margin-bottom: 24px; line-height: 1.5;">Connect directly to our offline node to secure your position in the live queue.</p>
+      <h2 style="font-size: 20px; margin-bottom: 8px; font-weight: 900; letter-spacing: -0.5px;">Welcome to the Clinic</h2>
+      <p style="font-size: 13px; color: var(--text-2); margin-bottom: 24px; line-height: 1.5; font-weight: 500;">Connect directly to our offline node to secure your position in the live queue.</p>
       
       <button class="btn" onclick="setView('walkin')">🏥 Register Walk-In</button>
       <button class="btn" onclick="setView('checkin')">🔑 I Have a Pre-Booked ID</button>
@@ -117,7 +119,7 @@
   <!-- VIEW: WALKIN -->
   <div id="view-walkin" class="view">
     <div class="glass-panel">
-      <h2 style="font-size: 18px; margin-bottom: 20px; text-align: center;">Walk-In Registration</h2>
+      <h2 style="font-size: 20px; margin-bottom: 24px; text-align: center; font-weight: 900; letter-spacing: -0.5px;">Walk-In Registration</h2>
       
       <label>Patient Name</label>
       <input type="text" id="w-name" placeholder="Enter Full Name" required>
@@ -142,8 +144,8 @@
   <!-- VIEW: CHECKIN -->
   <div id="view-checkin" class="view">
     <div class="glass-panel">
-      <h2 style="font-size: 18px; margin-bottom: 20px; text-align: center;">Pre-Booked Check-In</h2>
-      <p style="font-size: 13px; color: var(--text-2); margin-bottom: 20px; text-align: center;">Enter the Alpha-ID provided when you booked your appointment online to confirm you have arrived.</p>
+      <h2 style="font-size: 20px; margin-bottom: 12px; text-align: center; font-weight: 900; letter-spacing: -0.5px;">Pre-Booked Check-In</h2>
+      <p style="font-size: 12px; color: var(--text-2); margin-bottom: 24px; text-align: center; font-weight: 500; line-height: 1.5;">Enter the Alpha-ID provided when you booked your appointment online to confirm you have arrived.</p>
       
       <label>Alpha-ID</label>
       <input type="text" id="c-id" placeholder="e.g. SQ-12A" style="text-transform: uppercase;">
@@ -159,12 +161,12 @@
   <!-- VIEW: SUCCESS -->
   <div id="view-success" class="view">
     <div class="glass-panel success-box">
-      <div style="width: 50px; height: 50px; border-radius: 50%; background: rgba(16, 185, 129, 0.15); color: #10b981; display: inline-flex; align-items: center; justify-content: center; font-size: 24px; margin-bottom: 12px; border: 1px solid rgba(16, 185, 129, 0.3);">✓</div>
-      <h2 style="font-size: 18px; margin-bottom: 4px;">Queue Confirmed</h2>
-      <p style="font-size: 13px; color: var(--text-2); margin-bottom: 16px;">Your token generated successfully offline.</p>
+      <div style="width: 56px; height: 56px; border-radius: 16px; background: #ecfdf5; color: #10b981; display: inline-flex; align-items: center; justify-content: center; font-size: 28px; margin-bottom: 16px; border: 1px solid #d1fae5; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);">✓</div>
+      <h2 style="font-size: 24px; margin-bottom: 6px; font-weight: 900; letter-spacing: -0.5px; color: var(--text-1);">Queue Confirmed</h2>
+      <p style="font-size: 12px; color: var(--text-2); margin-bottom: 24px; font-weight: 600;">Your token generated successfully offline.</p>
       
-      <div style="background: rgba(0,0,0,0.3); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 20px;">
-        <span style="font-size: 11px; color: var(--text-2); text-transform: uppercase; font-weight: bold;">Token ID</span>
+      <div style="background: var(--bg); border: 1px solid var(--border); border-radius: 16px; padding: 24px; margin-bottom: 24px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);">
+        <span style="font-size: 10px; color: var(--text-2); text-transform: uppercase; font-weight: 800; letter-spacing: 1px;">Token ID</span>
         <div class="id" id="s-id">WQ-00</div>
         <div class="ewt" id="s-ewt">Estimated Wait: --</div>
       </div>
