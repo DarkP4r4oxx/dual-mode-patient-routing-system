@@ -196,15 +196,15 @@ function PatientPortal() {
         </div>
 
         {/* Right: Unified Pill */}
-        <div className="hidden sm:flex items-center bg-slate-100/90 backdrop-blur-md rounded-full p-1.5 shadow-sm border border-slate-200/50">
+        <div className="flex items-center bg-slate-100/90 backdrop-blur-md rounded-full p-1.5 shadow-sm border border-slate-200/50">
           
           {/* Navigation Links inside Pill */}
-          <div className="flex items-center px-4 gap-6 text-[11px] font-bold tracking-widest text-slate-600">
-            <button onClick={() => navigate('/queue')} className="hover:text-slate-900 transition-colors uppercase">
-              Live Queue
+          <div className="flex items-center px-3 sm:px-4 gap-3 sm:gap-6 text-[10px] sm:text-[11px] font-bold tracking-widest text-slate-600">
+            <button onClick={() => navigate('/queue')} className="hover:text-slate-900 transition-colors uppercase whitespace-nowrap">
+              <span className="hidden sm:inline">Live </span>Queue
             </button>
-            <div className="flex items-center gap-3">
-              {['EN', 'MH', 'HI'].map((l) => (
+            <div className="flex items-center gap-2 sm:gap-3 border-l border-slate-200 pl-3 sm:pl-0 sm:border-0">
+              {['EN', 'HI'].map((l) => (
                 <button key={l} onClick={() => setLang(l)} className={`transition-colors uppercase ${lang === l ? 'text-slate-900' : 'hover:text-slate-900'}`}>
                   {l}
                 </button>
@@ -214,23 +214,14 @@ function PatientPortal() {
 
           {/* Action Button inside Pill */}
           {user ? (
-            <div className="flex items-center gap-3 rounded-full pl-3 pr-4 py-2 bg-slate-800 text-white shadow-sm ml-2">
-              <div className="text-xs font-bold truncate max-w-[100px]">{user?.displayName || user?.email?.split('@')[0]}</div>
+            <div className="flex items-center gap-2 sm:gap-3 rounded-full pl-2 sm:pl-3 pr-2 sm:pr-4 py-1.5 sm:py-2 bg-slate-800 text-white shadow-sm ml-1 sm:ml-2">
+              <div className="text-[10px] sm:text-xs font-bold truncate max-w-[60px] sm:max-w-[100px]">{user?.displayName || user?.email?.split('@')[0]}</div>
               <button onClick={handleSignOut} className="text-slate-300 hover:text-white transition-colors" title="Sign Out"><LogOut size={14} /></button>
             </div>
           ) : (
-            <button onClick={() => navigate('/login')} className="bg-slate-800 hover:bg-slate-900 text-white px-6 py-2.5 rounded-full text-[11px] font-bold tracking-widest uppercase transition-all ml-2 shadow-sm">
+            <button onClick={() => navigate('/login')} className="bg-slate-800 hover:bg-slate-900 text-white px-4 sm:px-6 py-2 sm:py-2.5 rounded-full text-[9px] sm:text-[11px] font-bold tracking-widest uppercase transition-all ml-1 sm:ml-2 shadow-sm whitespace-nowrap">
               Sign In
             </button>
-          )}
-        </div>
-
-        {/* Mobile menu fallback (simplified) */}
-        <div className="sm:hidden flex items-center">
-          {user ? (
-            <button onClick={handleSignOut} className="p-2 text-slate-600"><LogOut size={20} /></button>
-          ) : (
-            <button onClick={() => navigate('/login')} className="text-sm font-bold text-slate-800">Sign In</button>
           )}
         </div>
       </header>
