@@ -245,11 +245,6 @@ function HeroSection({ t, onNext }) {
       
       {/* Left Column: Text */}
       <div className="flex-1 text-left space-y-8">
-        <div className="inline-flex items-center gap-2 border px-4 py-1.5 rounded-full text-[10px] font-bold text-blue-600 bg-blue-50 border-blue-200 shadow-sm">
-          <Activity size={14} className="animate-pulse" />
-          <span className="tracking-widest uppercase">HyQ Innovation Clinic</span>
-        </div>
-
         <div className="space-y-5">
           <h1 className="text-5xl sm:text-6xl md:text-7xl font-black tracking-tighter leading-[1.05] text-slate-900 text-balance">
             Transforming the <br/>
