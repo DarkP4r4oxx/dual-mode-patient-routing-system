@@ -616,6 +616,7 @@ function QueueTracker({ t, refCode, onReset, bookedSlot, bookedDate }) {
 function AnalyticsTab({ currentDoctor }) {
   const [completed, setCompleted] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [reportDuration, setReportDuration] = useState('Today');
 
   useEffect(() => {
     if (!currentDoctor) return;
@@ -633,15 +634,59 @@ function AnalyticsTab({ currentDoctor }) {
   if (loading) return <div className="text-center p-16"><div className="w-10 h-10 rounded-full border-4 border-slate-200 border-t-slate-800 animate-spin mx-auto"/></div>;
 
   const todayStr = new Date().toISOString().split('T')[0];
-  const todayCount = completed.filter(c => (c.booking_date || new Date(c.created_at).toISOString().split('T')[0]) === todayStr).length;
+  const todayCount = completed.filter(c => (c.booking_date || new Date(c.created_at?.toMillis?.() || Date.now()).toISOString().split('T')[0]) === todayStr).length;
+
+  const generateReport = () => {
+    const now = new Date();
+    let startDate = new Date(0);
+    if (reportDuration === 'Today') {
+      startDate = new Date(now.setHours(0,0,0,0));
+    } else if (reportDuration === '7Days') {
+      startDate = new Date(now.setDate(now.getDate() - 7));
+    } else if (reportDuration === '30Days') {
+      startDate = new Date(now.setDate(now.getDate() - 30));
+    }
+
+    const filtered = completed.filter(c => {
+      const d = new Date(c.created_at?.toMillis?.() || c.booking_date || Date.now());
+      return d >= startDate;
+    });
+
+    if (filtered.length === 0) return alert("No completed patients found in this duration.");
+
+    const headers = "Patient Name,Phone,Consultation Type,Date,Status\n";
+    const csv = filtered.map(c => 
+      `"${c.patient_name || ''}","${c.phone || ''}","${c.consultation_type || ''}","${c.booking_date || new Date(c.created_at?.toMillis?.() || Date.now()).toLocaleDateString()}","${c.status || ''}"`
+    ).join("\n");
+
+    const blob = new Blob([headers + csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `Report_${currentDoctor?.name || 'Doctor'}_${reportDuration}.csv`;
+    a.click();
+  };
 
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-500">
        <div className="bg-white p-8 rounded-3xl border border-slate-100 shadow-xl shadow-slate-200/50">
-          <h2 className="text-xl font-black mb-6 flex items-center gap-3 text-slate-900 tracking-tight">
-            <div className="p-2 bg-blue-50 text-blue-600 rounded-xl border border-blue-100"><Activity size={20} strokeWidth={2.5}/></div>
-            Performance Analytics
-          </h2>
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+            <h2 className="text-xl font-black flex items-center gap-3 text-slate-900 tracking-tight">
+              <div className="p-2 bg-blue-50 text-blue-600 rounded-xl border border-blue-100"><Activity size={20} strokeWidth={2.5}/></div>
+              Performance Analytics
+            </h2>
+            <div className="flex items-center gap-3 bg-slate-50 p-1.5 rounded-xl border border-slate-200">
+               <select value={reportDuration} onChange={(e) => setReportDuration(e.target.value)} className="bg-transparent text-xs font-bold text-slate-700 outline-none px-2 uppercase tracking-widest cursor-pointer">
+                 <option value="Today">Today</option>
+                 <option value="7Days">Last 7 Days</option>
+                 <option value="30Days">Last 30 Days</option>
+                 <option value="AllTime">All Time</option>
+               </select>
+               <button onClick={generateReport} className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-[10px] font-bold uppercase tracking-widest shadow-sm transition-colors">
+                 Download Report
+               </button>
+            </div>
+          </div>
           <div className="grid sm:grid-cols-2 gap-5">
              <div className="bg-slate-50 border border-slate-200 p-6 rounded-2xl shadow-sm">
                 <p className="text-[10px] uppercase font-bold tracking-widest text-slate-500 mb-2">Patients Seen Today</p>
@@ -798,6 +843,12 @@ function DoctorDashboard() {
   const displayQueue = queue.filter(p => {
     const pDate = p.booking_date || new Date().toISOString().split('T')[0];
     if (pDate !== filterDate) return false;
+    
+    // Strict isolation for doctors
+    if (currentDoctor) {
+      return p.doctor === currentDoctor.name;
+    }
+    
     return filterDoctor === 'All' ? true : p.doctor === filterDoctor;
   });
 
@@ -875,17 +926,20 @@ function DoctorDashboard() {
           {/* Filters: Date & DoctorTabs */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
             <div className="flex gap-2.5 overflow-x-auto pb-2 shrink-0">
-              <button onClick={() => setFilterDoctor('All')}
-                className={`px-4 py-2 rounded-full text-[10px] font-bold uppercase tracking-widest whitespace-nowrap border transition-all shadow-sm ${filterDoctor === 'All' ? 'bg-slate-800 text-white border-slate-800' : 'bg-white text-slate-500 border-slate-200 hover:text-slate-800 hover:bg-slate-50'}`}>
-                All Patients ({queue.filter(q => (q.booking_date || new Date().toISOString().split('T')[0]) === filterDate).length})
-              </button>
+              {!currentDoctor && (
+                <button onClick={() => setFilterDoctor('All')}
+                  className={`px-4 py-2 rounded-full text-[10px] font-bold uppercase tracking-widest whitespace-nowrap border transition-all shadow-sm ${filterDoctor === 'All' ? 'bg-slate-800 text-white border-slate-800' : 'bg-white text-slate-500 border-slate-200 hover:text-slate-800 hover:bg-slate-50'}`}>
+                  All Patients ({queue.filter(q => (q.booking_date || new Date().toISOString().split('T')[0]) === filterDate).length})
+                </button>
+              )}
           {DOCTORS.map(doc => {
+            if (currentDoctor && doc.name !== currentDoctor.name) return null; // Force isolate doctor tabs
             const count = queue.filter(p => p.doctor === doc.name && (p.booking_date || new Date().toISOString().split('T')[0]) === filterDate).length;
-            if (count === 0 && filterDoctor !== doc.name) return null; // hide empty doctors unless selected
+            if (!currentDoctor && count === 0 && filterDoctor !== doc.name) return null; // hide empty doctors unless selected
             return (
               <button key={doc.id} onClick={() => setFilterDoctor(doc.name)}
-                className={`px-4 py-2 rounded-full text-[10px] font-bold uppercase tracking-widest whitespace-nowrap border flex items-center gap-2 transition-all shadow-sm ${filterDoctor === doc.name ? 'bg-slate-800 text-white border-slate-800' : 'bg-white text-slate-500 border-slate-200 hover:text-slate-800 hover:bg-slate-50'}`}>
-                <div className={`w-2.5 h-2.5 rounded-full ${doc.color} shadow-inner`} />{doc.name.split(' ')[1]} ({count})
+                className={`px-4 py-2 rounded-full text-[10px] font-bold uppercase tracking-widest whitespace-nowrap border flex items-center gap-2 transition-all shadow-sm ${filterDoctor === doc.name || currentDoctor ? 'bg-slate-800 text-white border-slate-800' : 'bg-white text-slate-500 border-slate-200 hover:text-slate-800 hover:bg-slate-50'}`}>
+                <div className={`w-2.5 h-2.5 rounded-full ${doc.color} shadow-inner`} />{doc.name.split(' ').pop()} ({count})
               </button>
             );
           })}
@@ -945,7 +999,7 @@ function DoctorDashboard() {
                     </div>
                     <div className="flex justify-between items-center bg-slate-50 rounded-xl p-3 border border-slate-100 shadow-inner">
                        <div className="flex items-center gap-3">
-                         {doc && <div className={`w-7 h-7 rounded-lg ${doc.color} flex items-center justify-center text-white text-xs font-bold shadow-sm`}>{doc.name.split(' ')[1][0]}</div>}
+                         {doc && <div className={`w-7 h-7 rounded-lg ${doc.color} flex items-center justify-center text-white text-xs font-bold shadow-sm`}>{doc.name.split(' ').pop().charAt(0)}</div>}
                          <span className="text-xs font-bold text-slate-700 truncate">{patient.doctor} <span className="text-slate-400 hidden sm:inline font-semibold">• {patient.specialty}</span></span>
                        </div>
                     </div>
@@ -969,7 +1023,7 @@ function DoctorDashboard() {
                     </div>
                     <div className="col-span-2">
                       <div className="flex items-center gap-2.5">
-                        {doc && <div className={`w-6 h-6 rounded-lg ${doc.color} flex items-center justify-center text-white text-[10px] font-bold shadow-sm`}>{doc.name.split(' ')[1][0]}</div>}
+                        {doc && <div className={`w-6 h-6 rounded-lg ${doc.color} flex items-center justify-center text-white text-[10px] font-bold shadow-sm`}>{doc.name.split(' ').pop().charAt(0)}</div>}
                         <span className="text-xs font-bold text-slate-700 truncate">{patient.doctor || '--'}</span>
                       </div>
                       <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1 ml-8">{patient.specialty || ''}</p>
